@@ -1,0 +1,18 @@
+{
+  "name": "require-to-import",
+  "version": "0.0.1",
+  "description": "Converts require() statements to import.",
+  "main": "test.js",
+  "scripts": {
+    "test": "mocha test/transforms test/utils.js"
+  },
+  "author": "Jamis Charles",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "jscodeshift": "^0.3.8",
+    "mocha": "^2.3.3",
+    "recast": "^0.10.34"
+  }
+}
