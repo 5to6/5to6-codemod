@@ -33,6 +33,7 @@ describe('requireToImport transform', function() {
 
       var result = transformToTest(fileInfo, api);
 
+      console.log('result \n ********************* \n', result);
       expect(result).to.be(expectedSrc)
       // console.log('result', result);
       done();

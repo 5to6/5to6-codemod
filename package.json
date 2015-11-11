@@ -1,7 +1,7 @@
 {
-  "name": "require-to-import",
+  "name": "5to6",
   "version": "0.0.1",
-  "description": "Converts require() statements to import.",
+  "description": "A collection of codemods that allow you to transform your js code from ES5 to ES6.",
   "main": "test.js",
   "scripts": {
     "test": "mocha test/transforms test/utils.js"

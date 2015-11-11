@@ -25,7 +25,7 @@ describe('util.getPropsFromRequire(ast)', function(){
   it("require('something') -> {moduleName: 'something'}", function() {
     var ast = toAST("require('underscore');")[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
-    var expected = {variableName: undefined, moduleName: 'underscore'};
+    var expected = {moduleName: 'underscore'};
 
     expect(result).to.eql(expected);
   });
@@ -37,6 +37,15 @@ describe('util.getPropsFromRequire(ast)', function(){
 
     expect(result).to.eql(expected);
   });
+
+  it("var fetch = require('underscore').pluck -> {variableName = 'pluck', moduleName: 'underscore', prop: 'pluck'}", function() {
+    var ast = toAST("var fetch = require('underscore').pluck;")[0]; // returns an array of statements
+    var result = utils.getPropsFromRequire(ast);
+    var expected = {variableName: 'fetch', moduleName: 'underscore', propName: 'pluck'};
+
+    expect(result).to.eql(expected);
+  });
+
 });
 
 describe('util.createImportStatement(moduleName [, variableName])', function(){
@@ -54,6 +63,22 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 
     expect(result).to.be(expected);
   });
+
+  it('-> `import {pluck} from \'jquery\'` when passed 3 params', function() {
+    var result = toString(utils.createImportStatement('jquery', 'pluck', 'pluck'));
+    var expected = "import {pluck} from 'jquery';";
+
+    expect(result).to.be(expected);
+  });
+
+  it('-> `import {fetch as pluck} from \'jquery\'` when passed 3 params', function() {
+    var result = toString(utils.createImportStatement('jquery', 'fetch', 'pluck'));
+    var expected = "import {pluck as fetch} from 'jquery';";
+
+    expect(result).to.be(expected);
+  });
+
+
 
 });
 
