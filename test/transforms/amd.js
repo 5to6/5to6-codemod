@@ -19,7 +19,6 @@ var amdTransform = require('../../transforms/amd');
  */
 describe('AMD transform', function() {
   it('should convert define() { } -> ', function() {
-    console.log(__dirname);
     var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/amd.before.js')).toString();
     var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/amd.after.js')).toString();
     var result = amdTransform({ source: src }, { jscodeshift: jscodeshift });

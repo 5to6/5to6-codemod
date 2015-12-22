@@ -86,22 +86,22 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 describe('util.singleVarToExpressions(ast)', function(){
 
   it('should turn a single var statement into an array of expressions\'}', function() {
-    var string =  ''
+    var string = ''
     + 'var jamis = \'bar\',\n'
     + ' _ = require(\'lodash\'),\n'
     + ' lodash = require(\'undescore\'),\n'
     + ' bar,\n'
     + ' foo = \'bar\',\n'
-    + ' $ = require(\'jquery\');'
+    + ' $ = require(\'jquery\');';
 
     // TODO: Consider moving this into a fixture file instead...
-    var expected =  ''
+    var expected = ''
     + 'var jamis = \'bar\';\n'
     + 'var _ = require(\'lodash\');\n'
     + 'var lodash = require(\'undescore\');\n'
     + 'var bar;\n'
     + 'var foo = \'bar\';\n'
-    + 'var $ = require(\'jquery\');'
+    + 'var $ = require(\'jquery\');';
 
 
     var ast = toAST(string)[0]; // returns an array of statements
@@ -127,11 +127,11 @@ function toString(ast) {
     ast = {
         type: 'Program',
         body: ast
-    }
+    };
   }
 
   // force single quotes in the output...
-  return recast.print(ast, {quote: 'single'}).code;
+  return recast.print(ast, { quote: 'single' }).code;
 
 }
 

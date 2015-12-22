@@ -41,7 +41,8 @@ module.exports = function(fileInfo, api) {
 
             // reach higher in the tree to replace the var statement with an import. Needed so we don't just
             // replace require() with the import statement.
-            return j(varParent).replaceWith(importStatement);
+            j(varParent).replaceWith(importStatement);
+            return;
 
         }
 
@@ -50,12 +51,12 @@ module.exports = function(fileInfo, api) {
         props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
         importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
 
-        return j(p.parent).replaceWith(importStatement);
-
+        j(p.parent).replaceWith(importStatement);
+        return;
     })
     // FIXME: make this a config to pass in?
     .toSource({quote: 'single'});
-}
+};
 
 
 /**

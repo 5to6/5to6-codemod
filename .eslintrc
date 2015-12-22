@@ -8,7 +8,7 @@
   "rules": {
     "quotes": [2, "single"],
     "no-use-before-define": 0,
-    "no-console": 0
+    "no-console": 1
   },
   "ecmaFeatures": {
     "modules": true
