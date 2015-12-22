@@ -3,16 +3,13 @@
 /**
  * DEPS
  */
-var jscodeshift = require('jscodeshift');
 var recast = require('recast');
 var fs = require('fs');
-var expect = require('expect.js');
+var assert = require('assert');
 
 /**
  * LOCAL DEPS
  */
-var transformToTest = require('../transforms/requireToImport.js');
-var api = {jscodeshift: jscodeshift};
 var utils = require('../utils/main');
 
 /**
@@ -25,25 +22,25 @@ describe('util.getPropsFromRequire(ast)', function(){
   it("require('something') -> {moduleName: 'something'}", function() {
     var ast = toAST("require('underscore');")[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
-    var expected = {moduleName: 'underscore'};
-
-    expect(result).to.eql(expected);
+    var expected = { moduleName: 'underscore' };
+    assert.deepEqual(result, expected);
   });
 
   it("var _ = require('underscore') -> {variableName = '_', moduleName: 'something'}", function() {
     var ast = toAST("var _ = require('underscore');")[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
-    var expected = {variableName: '_', moduleName: 'underscore'};
+    var expected = { variableName: '_', moduleName: 'underscore' };
 
-    expect(result).to.eql(expected);
+    assert.deepEqual(result, expected);
+
   });
 
   it("var fetch = require('underscore').pluck -> {variableName = 'pluck', moduleName: 'underscore', prop: 'pluck'}", function() {
     var ast = toAST("var fetch = require('underscore').pluck;")[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
-    var expected = {variableName: 'fetch', moduleName: 'underscore', propName: 'pluck'};
+    var expected = { variableName: 'fetch', moduleName: 'underscore', propName: 'pluck' };
 
-    expect(result).to.eql(expected);
+    assert.deepEqual(result, expected);
   });
 
 });
@@ -54,28 +51,28 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
     var result = toString(utils.createImportStatement('jquery'));
     var expected = "import 'jquery';";
 
-    expect(result).to.be(expected);
+    assert.deepEqual(result, expected);
   });
 
   it('-> `import $ from \'jquery\'` when passed 2 params', function() {
     var result = toString(utils.createImportStatement('jquery', '$'));
     var expected = "import $ from 'jquery';";
 
-    expect(result).to.be(expected);
+    assert.deepEqual(result, expected);
   });
 
   it('-> `import {pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'pluck', 'pluck'));
     var expected = "import {pluck} from 'jquery';";
 
-    expect(result).to.be(expected);
+    assert.deepEqual(result, expected);
   });
 
   it('-> `import {fetch as pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'fetch', 'pluck'));
     var expected = "import {pluck as fetch} from 'jquery';";
 
-    expect(result).to.be(expected);
+    assert.deepEqual(result, expected);
   });
 
 
@@ -111,7 +108,7 @@ describe('util.singleVarToExpressions(ast)', function(){
     var ast = toAST(string)[0]; // returns an array of statements
     var result = toString(utils.singleVarToExpressions(ast));
 
-    expect(result).to.eql(expected);
+    assert.deepEqual(result, expected);
   });
 });
 

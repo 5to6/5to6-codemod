@@ -3,10 +3,15 @@
 A collection of [codemods](https://medium.com/@cpojer/effective-javascript-codemods-5a6686bb46fb) that allow you to transform your
 js code from ES5 to ES6.
 
+## Options
+
+- `jscodeshift -t transforms/cjs.js fileToTransform.js`
+- `jscodeshift -t transforms/amd.js fileToTransform.js`
 
 ## What it does
+
 Apply a transform to a file via [jscodeshift](https://github.com/facebook/jscodeshift):
-`$ jscodeshift -t requireToImportTransform.js fileToTransform.js`
+`$ jscodeshift -t cjs.js fileToTransform.js`
 
 **Before**
 ```js
