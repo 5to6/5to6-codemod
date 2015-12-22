@@ -4,7 +4,6 @@
  * DEPS
  */
 var recast = require('recast');
-var fs = require('fs');
 var assert = require('assert');
 
 /**
@@ -19,15 +18,15 @@ var utils = require('../utils/main');
 
 describe('util.getPropsFromRequire(ast)', function(){
 
-  it("require('something') -> {moduleName: 'something'}", function() {
-    var ast = toAST("require('underscore');")[0]; // returns an array of statements
+  it('require(\'something\') -> {moduleName: \'something\'}', function() {
+    var ast = toAST('require(\'underscore\');')[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
     var expected = { moduleName: 'underscore' };
     assert.deepEqual(result, expected);
   });
 
-  it("var _ = require('underscore') -> {variableName = '_', moduleName: 'something'}", function() {
-    var ast = toAST("var _ = require('underscore');")[0]; // returns an array of statements
+  it('var _ = require(\'underscore\') -> {variableName = \'_\', moduleName: \'something\'}', function() {
+    var ast = toAST('var _ = require(\'underscore\');')[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
     var expected = { variableName: '_', moduleName: 'underscore' };
 
@@ -35,8 +34,8 @@ describe('util.getPropsFromRequire(ast)', function(){
 
   });
 
-  it("var fetch = require('underscore').pluck -> {variableName = 'pluck', moduleName: 'underscore', prop: 'pluck'}", function() {
-    var ast = toAST("var fetch = require('underscore').pluck;")[0]; // returns an array of statements
+  it('var fetch = require(\'underscore\').pluck -> {variableName = \'pluck\', moduleName: \'underscore\', prop: \'pluck\'}', function() {
+    var ast = toAST('var fetch = require(\'underscore\').pluck;')[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
     var expected = { variableName: 'fetch', moduleName: 'underscore', propName: 'pluck' };
 
@@ -49,28 +48,28 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 
   it('-> `import \'jquery\'` when passed 1 param', function() {
     var result = toString(utils.createImportStatement('jquery'));
-    var expected = "import 'jquery';";
+    var expected = 'import \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
 
   it('-> `import $ from \'jquery\'` when passed 2 params', function() {
     var result = toString(utils.createImportStatement('jquery', '$'));
-    var expected = "import $ from 'jquery';";
+    var expected = 'import $ from \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
 
   it('-> `import {pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'pluck', 'pluck'));
-    var expected = "import {pluck} from 'jquery';";
+    var expected = 'import {pluck} from \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
 
   it('-> `import {fetch as pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'fetch', 'pluck'));
-    var expected = "import {pluck as fetch} from 'jquery';";
+    var expected = 'import {pluck as fetch} from \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
@@ -86,23 +85,23 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 // Than can then be processed individually, and replaced wholesale...
 describe('util.singleVarToExpressions(ast)', function(){
 
-  it("should turn a single var statement into an array of expressions'}", function() {
-    var string =  ""
-    + "var jamis = 'bar',\n"
-    + " _ = require('lodash'),\n"
-    + " lodash = require('undescore'),\n"
-    + " bar,\n"
-    + " foo = 'bar',\n"
-    + " $ = require('jquery');"
+  it('should turn a single var statement into an array of expressions\'}', function() {
+    var string =  ''
+    + 'var jamis = \'bar\',\n'
+    + ' _ = require(\'lodash\'),\n'
+    + ' lodash = require(\'undescore\'),\n'
+    + ' bar,\n'
+    + ' foo = \'bar\',\n'
+    + ' $ = require(\'jquery\');'
 
     // TODO: Consider moving this into a fixture file instead...
-    var expected =  ""
-    + "var jamis = 'bar';\n"
-    + "var _ = require('lodash');\n"
-    + "var lodash = require('undescore');\n"
-    + "var bar;\n"
-    + "var foo = 'bar';\n"
-    + "var $ = require('jquery');"
+    var expected =  ''
+    + 'var jamis = \'bar\';\n'
+    + 'var _ = require(\'lodash\');\n'
+    + 'var lodash = require(\'undescore\');\n'
+    + 'var bar;\n'
+    + 'var foo = \'bar\';\n'
+    + 'var $ = require(\'jquery\');'
 
 
     var ast = toAST(string)[0]; // returns an array of statements
@@ -115,21 +114,6 @@ describe('util.singleVarToExpressions(ast)', function(){
 /******************************************
  * Test Helpers...
  ******************************************/
-
-// FIXME: can it just be sync? does it matter?
-/**
- * Reads the file and calls the cb with the contents as a string.
- *
- */
-function getSource(path, cb) {
-  fs.readFile(process.cwd() + path, function (err, data) {
-    if (err) throw err;
-
-    return cb(null, data.toString());
-  });
-}
-
-
 
 /**
  * Converst the AST obj/tree and turns it into readable code.

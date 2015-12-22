@@ -12,6 +12,8 @@ module.exports = function(fileInfo, api) {
     .find(j.CallExpression, {callee: { name: 'require' }}) // find require() function calls
     .forEach(function(p) {
 
+        var props, importStatement;
+
         // is this require() part of a var declaration?
         // var $ = require('jquery');
         var varParent = findVarParent(p);
@@ -20,9 +22,9 @@ module.exports = function(fileInfo, api) {
         if (varParent && isSingleVar(varParent)) {
             // wrap the variableDeclarator in a VariableDeclaration (for more consistent prop extraction)
             var varStatement = j.variableDeclaration('var', [p.parentPath.value]);
-            var props = util.getPropsFromRequire(varStatement);
+            props = util.getPropsFromRequire(varStatement);
 
-            var importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+            importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
 
             // insert the new import statement AFTER the singleVar and and remove the require() from the single var.
             //j(varParent).insertAfter(importStatement);
@@ -34,8 +36,8 @@ module.exports = function(fileInfo, api) {
             return;
 
         } else if (varParent) {
-            var props = util.getPropsFromRequire(varParent);
-            var importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+            props = util.getPropsFromRequire(varParent);
+            importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
 
             // reach higher in the tree to replace the var statement with an import. Needed so we don't just
             // replace require() with the import statement.
@@ -45,8 +47,8 @@ module.exports = function(fileInfo, api) {
 
         // not part of a var statment
         // require('underscore');
-        var props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
-        var importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+        props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
+        importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
 
         return j(p.parent).replaceWith(importStatement);
 
@@ -82,7 +84,7 @@ function findVarParent(node) {
         node = node.parentPath;
         //console.log('node', node)
 
-        if (node.value.type === "VariableDeclaration") {
+        if (node.value.type === 'VariableDeclaration') {
             //console.log('decs', node.value.declarations.length);
             // console.log('singleVarValue', node);
             return node;
