@@ -3,7 +3,7 @@ define(function() {
 });
 
 define([], function() {
-	console.log('a');
+	console.log('b');
 });
 
 define(['a'], function() {

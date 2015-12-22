@@ -8,10 +8,8 @@ var util = require('../utils/main');
  */
 module.exports = function(fileInfo, api) {
     var j = api.jscodeshift;
-
-
     return j(fileInfo.source)
-    .find(j.CallExpression, {callee: {name: 'require'}}) // find require() function calls
+    .find(j.CallExpression, {callee: { name: 'require' }}) // find require() function calls
     .forEach(function(p) {
 
         // is this require() part of a var declaration?
@@ -80,15 +78,15 @@ function isSingleVar(node) {
  */
 function findVarParent(node) {
     // traverse up the tree until end, or you find var declaration
-    while(node.parentPath){
+    while(node.parentPath) {
         node = node.parentPath;
         //console.log('node', node)
 
-        if (node.value.type === "VariableDeclaration"){
+        if (node.value.type === "VariableDeclaration") {
             //console.log('decs', node.value.declarations.length);
             // console.log('singleVarValue', node);
             return node;
-        };
+        }
     }
 
     return false;

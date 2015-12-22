@@ -4,7 +4,6 @@
  * DEPS
  */
 var jscodeshift = require('jscodeshift');
-var recast = require('recast');
 var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
@@ -27,14 +26,3 @@ describe('AMD transform', function() {
     assert.equal(result, expectedSrc);
   });
 });
-
-/**
- * Converst the AST obj/tree and turns it into readable code.
- * Returns a string.
- *
- */
-function toString(ast) {
-  // force single quotes in the output...
-  return recast.print(ast, {quote: 'single'}).code;
-
-}
