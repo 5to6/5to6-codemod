@@ -6,56 +6,63 @@ var util = require('../utils/main');
 /**
  * Will convert require() statements in a js file to es6 import statements
  */
-module.exports = function(fileInfo, api) {
+module.exports = function(file, api) {
     var j = api.jscodeshift;
-    return j(fileInfo.source)
-    .find(j.CallExpression, {callee: { name: 'require' }}) // find require() function calls
-    .forEach(function(p) {
+    var root = j(file.source);
+    var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
 
-        var props, importStatement;
+    // migrate away all the imports
+    root.find(j.CallExpression, { callee: { name: 'require' } }) // find require() function calls
+        .forEach(function(p) {
 
-        // is this require() part of a var declaration?
-        // var $ = require('jquery');
-        var varParent = findVarParent(p);
+            var props, importStatement;
 
-        // am I part of a single var statement?
-        if (varParent && isSingleVar(varParent)) {
-            // wrap the variableDeclarator in a VariableDeclaration (for more consistent prop extraction)
-            var varStatement = j.variableDeclaration('var', [p.parentPath.value]);
-            props = util.getPropsFromRequire(varStatement);
+            // is this require() part of a var declaration?
+            // var $ = require('jquery');
+            var varParent = findVarParent(p);
 
+            // am I part of a single var statement?
+            if (varParent && isSingleVar(varParent)) {
+                // wrap the variableDeclarator in a VariableDeclaration (for more consistent prop extraction)
+                var varStatement = j.variableDeclaration('var', [p.parentPath.value]);
+                props = util.getPropsFromRequire(varStatement);
+
+                importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+
+                // insert the new import statement AFTER the singleVar and and remove the require() from the single var.
+                //j(varParent).insertAfter(importStatement);
+                // HACK: Using before for now, to avoid it mangling the whitespace after the var statement.
+                // This will cause problems if the single var statement contains deps that the other els depend on
+                j(p.parentPath.parent).insertBefore(importStatement);
+                j(p.parent).remove();
+
+                return;
+
+            } else if (varParent) {
+                props = util.getPropsFromRequire(varParent);
+                importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+
+                // reach higher in the tree to replace the var statement with an import. Needed so we don't just
+                // replace require() with the import statement.
+                j(varParent).replaceWith(importStatement);
+                return;
+
+            }
+
+            // not part of a var statment
+            // require('underscore');
+            props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
             importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
 
-            // insert the new import statement AFTER the singleVar and and remove the require() from the single var.
-            //j(varParent).insertAfter(importStatement);
-            // HACK: Using before for now, to avoid it mangling the whitespace after the var statement.
-            // This will cause problems if the single var statement contains deps that the other els depend on
-            j(p.parentPath.parent).insertBefore(importStatement);
-            j(p.parent).remove();
-
+            j(p.parent).replaceWith(importStatement);
             return;
+        });
 
-        } else if (varParent) {
-            props = util.getPropsFromRequire(varParent);
-            importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
+    // re-add comment to to the top
+    root.get().node.comments = leadingComment;
 
-            // reach higher in the tree to replace the var statement with an import. Needed so we don't just
-            // replace require() with the import statement.
-            j(varParent).replaceWith(importStatement);
-            return;
-
-        }
-
-        // not part of a var statment
-        // require('underscore');
-        props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
-        importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
-
-        j(p.parent).replaceWith(importStatement);
-        return;
-    })
     // FIXME: make this a config to pass in?
-    .toSource({quote: 'single'});
+    return root.toSource({ quote: 'single' });
 };
 
 

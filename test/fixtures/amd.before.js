@@ -1,12 +1,21 @@
+/**
+ * Top of the mornin' to ya
+ */
 define(function() {
 	console.log('a');
 });
+
+/**
+ * Hunger Games is real
+ */
 
 define([], function() {
 	console.log('b');
 });
 
+// line comment a
 define(['a'], function() {
+	// line comment b
 	console.log('dont bother with a');
 });
 
