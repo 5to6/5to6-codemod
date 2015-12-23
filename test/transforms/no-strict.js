@@ -11,17 +11,17 @@ var assert = require('assert');
 /**
  * LOCAL DEPS
  */
-var cjsTransform = require('../../transforms/no-strict');
+var nsTransform = require('../../transforms/no-strict');
 
 /**
  * TESTS
  *
  */
-describe('CJS transform', function() {
+describe('no-strict transform', function() {
 	it('should convert "use strict" => "" ', function() {
 		var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/no-strict.before.js')).toString();
 		var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/no-strict.after.js')).toString();
-		var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
+		var result = nsTransform({ source: src }, { jscodeshift: jscodeshift });
 		assert.equal(result, expectedSrc);
 	});
 });
