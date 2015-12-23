@@ -1,11 +1,9 @@
 /**
- * Replace this line with the utils/main.js file
+ * cjs - Replace require() calls with es6 imports statements
  */
+
 var util = require('../utils/main');
 
-/**
- * Will convert require() statements in a js file to es6 import statements
- */
 module.exports = function(file, api) {
     var j = api.jscodeshift;
     var root = j(file.source);
@@ -61,7 +59,6 @@ module.exports = function(file, api) {
     // re-add comment to to the top
     root.get().node.comments = leadingComment;
 
-    // FIXME: make this a config to pass in?
     return root.toSource({ quote: 'single' });
 };
 

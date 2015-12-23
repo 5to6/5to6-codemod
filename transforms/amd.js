@@ -1,11 +1,9 @@
 /**
- * Replace this line with the utils/main.js file
+ * amd - Replace define([]) calls with es6 import/exports
  */
+
 var util = require('../utils/main');
 
-/**
- * Will convert require() statements in a js file to es6 import statements
- */
 module.exports = function(file, api) {
     var j = api.jscodeshift;
     var root = j(file.source);

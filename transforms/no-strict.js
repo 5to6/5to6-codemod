@@ -1,7 +1,6 @@
 /**
- * Replace this line with the utils/main.js file
+ * no-strict - Remove "use strict" statements from files.
  */
-// var util = require('../utils/main');
 
 /**
  * Will convert require() statements in a js file to es6 import statements
@@ -21,6 +20,5 @@ module.exports = function(file, api) {
 	// re-add comment to to the top
 	root.get().node.comments = leadingComment;
 
-	// FIXME: make this a config to pass in?
 	return root.toSource({ quote: 'single' });
 };
