@@ -18,5 +18,9 @@ export let isAnnoying = true;
 var House = function() {};
 export default House;
 
+// this will be tricky and may require function hoisting...
+house('mouse');
+pork('bacon');
+
 // don't do anything here
 exports = 'a';

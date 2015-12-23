@@ -22,14 +22,11 @@ js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodesh
 * Currently loses comments if directly before the `require()` statement.
 * `require()` calls in single var statements get reordered, and moved before the single var after conversion to import.
 * Can't automagically figure out when you want to use `import * as varName`.
-* ...
+* End-of-line comments also missing in many situations
 
-## Appendix
+## Appendix - Transforms In-Depth
 
-### In Depth Example (CJS)
-
-Apply a transform to a file via [jscodeshift](https://github.com/facebook/jscodeshift):
-`$ jscodeshift -t cjs.js fileToTransform.js`
+### CJS Transform
 
 **Before**
 ```js

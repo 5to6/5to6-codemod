@@ -17,6 +17,10 @@ module.exports.isAnnoying = true;
 // A common enough case that is a bit weird... will need to be two lines
 var House = module.exports = function() {};
 
+// this will be tricky and may require function hoisting...
+exports.house('mouse');
+module.exports.pork('bacon');
+
 // don't do anything here
 exports = 'a';
 
