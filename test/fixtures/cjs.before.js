@@ -1,6 +1,8 @@
+// CJS top comment
+
 var jamis = require('jquery');
+var $ = require('jquery'); // end of line comment will get eaten
 var $ = require('jquery');
-var $ = require("jquery");
 require('something');
 
 var foo = bar;

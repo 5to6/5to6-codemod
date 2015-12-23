@@ -1,3 +1,5 @@
+// CJS top comment
+
 import jamis from 'jquery';
 import $ from 'jquery';
 import $ from 'jquery';

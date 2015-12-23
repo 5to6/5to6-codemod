@@ -1,9 +1,7 @@
-/**
- * HELPERS. Here for now. Prolly move to utils soon.
- */
 // http://skookum.com/blog/converting-a-project-from-amd-to-cjs-with-recast
 
 var j = require('jscodeshift');
+var recast = require('recast');
 
 var util = {
   // wraps each VariableDeclarator in a VariableDeclaration so it includes the 'var' and semicolon
@@ -18,7 +16,7 @@ var util = {
     ast = ast.value || ast;
 
     var expressions = [];
-    declarations = ast.declarations;
+    var declarations = ast.declarations;
     // safety checks
     // am I a single var statement?
     if (ast.type === 'VariableDeclaration' && ast.declarations.length > 1) {
@@ -54,7 +52,7 @@ var util = {
     if (!variableName) {
       declaration = j.importDeclaration([], j.literal(moduleName) );
       return declaration;
-    };
+    }
 
     // else returns `import $ from 'jquery'`
     nameIdentifier = j.identifier(variableName); //import var name
@@ -72,6 +70,16 @@ var util = {
   },
 
   /**
+   * Converts the AST obj/tree and turns it into readable code.
+   * Returns a string.
+   */
+  toString: function(ast) {
+    // force single quotes in the output...
+    return recast.print(ast, { quote: 'single' }).code;
+  },
+
+
+  /**
    * Pass in a require statement, returns the important parts.
    * @param ast {VariableDeclaration|ExpressionStatement} - Not the full AST.
    */
@@ -87,7 +95,7 @@ var util = {
       moduleName = ast.expression.arguments[0].value;
 
     // `var prop = require('jquery').prop;`
-    } else if (ast.type === 'VariableDeclaration' && ast.declarations[0].init.type === "MemberExpression") {
+    } else if (ast.type === 'VariableDeclaration' && ast.declarations[0].init.type === 'MemberExpression') {
       declarator = ast.declarations[0];
       propName = declarator.init.property.name;
       moduleName = declarator.init.object.arguments[0].value;
@@ -117,13 +125,17 @@ var util = {
     };
 
     // these are set sometimes
-    if (propName) obj.propName = propName;
-    if (variableName) obj.variableName = variableName;
+    if (propName) {
+      obj.propName = propName;
+    }
+    if (variableName) {
+      obj.variableName = variableName;
+    }
 
     return obj;
   }
 
-}
+};
 
 
 // DO NOT COPY THIS

@@ -1,12 +1,36 @@
-# 5to6
+# 5to6-codemod
 
 A collection of [codemods](https://medium.com/@cpojer/effective-javascript-codemods-5a6686bb46fb) that allow you to transform your
-js code from ES5 to ES6.
+js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodeshift).
 
+## Usage
 
-## What it does
+1. `npm install -g jscodeshift`
+2. `npm install 5to6-codemod`
+3. `jscodeshift -t node_modules/es6-codemod/transforms/[transform].js [files]`
+4. Review changes via `$ git diff`. Keep what you want, throw it out if you don't. Magic!
+
+## Transforms
+
+- `amd` - Transforms AMD style modules to ES6 imports/exports
+- `cjs` - Transforms CommonJS style modules to ES6 imports/exports
+- `no-strict` - Removes "use strict" statements
+
+## Known issues
+* Currently loses comments if directly before the `require()` statement.
+* require() calls in single var statements get reordered, and moved before the single var after conversion to import.
+* can't automagically figure out when you want to use `import * as varName`.
+
+## TODO:
+- [ ] Fix single var issues
+- [ ] Avoid losing info like comments when transforming require() statements.
+
+## Appendix
+
+### In Depth Example (CJS))
+
 Apply a transform to a file via [jscodeshift](https://github.com/facebook/jscodeshift):
-`$ jscodeshift -t requireToImportTransform.js fileToTransform.js`
+`$ jscodeshift -t cjs.js fileToTransform.js`
 
 **Before**
 ```js
@@ -49,20 +73,3 @@ import {routeTo} from '../routeHelper';
 import {pluck as fetch} from '../someUtil';
 
 ```
-
-## Getting started
-1. `$ npm install -g jscodeshift`
-2. pick a transform you want from the `transforms` folder.
-3. Save it locally on your machine.
-4. Remove the `require('./utils/main')` statement and copy/paste the content of `utils/main.js`. (Lame, I know)
-5. Run it via `$ jscodeshift -t yourLocallySavedTransformFile.js fileToTransform.js`.
-6. Review changes via `$ git diff`. Keep what you want, throw it out if you don't. Magic!
-
-## Known issues
-* Currently loses comments if directly before the `require()` statement.
-* require() calls in single var statements get reordered, and moved before the single var after conversion to import.
-* can't automagically figure out when you want to use `import * as varName`.
-
-## TODO:
-- [ ] Fix single var issues
-- [ ] Avoid losing info like comments when transforming require() statements.
