@@ -2,6 +2,7 @@
  * Top of the mornin' to ya
  */
 console.log('a');
+export default {};
 
 /**
  * Hunger Games is real
@@ -16,6 +17,7 @@ import 'a';
 console.log('dont bother with a');
 import a from 'a';
 console.log('I need you A', a.isUsed());
+export default a.b;
 import moduleA from 'a';
 import moduleB from 'b';
 import moduleC from 'c';

@@ -11,16 +11,34 @@ module.exports = function(file, api) {
     var root = j(file.source);
     var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
 
-    // root.find(j.VariableDeclaration).at(0).remove();
+    /**
+     * Convert an `return` to `export default`.
+     * @param ast - Function body AST (Array)
+     */
+    function returnToExport(body) {
+        var exportStatement;
+        var possibleReturn = body[body.length - 1];
+        if (possibleReturn && possibleReturn.type === 'ReturnStatement') {
+            exportStatement = j.exportDeclaration(true, possibleReturn.argument);
+            body[body.length - 1] = exportStatement;
+        }
+        return body;
+    }
 
     root
         .find(j.CallExpression, { callee: { name: 'define' } }) // find require() function calls
         .filter(function(p) { return p.parentPath.parentPath.name === 'body'; })
         .forEach(function(p) {
 
+            var body;
+
             // define(function() { });
             if (p.value.arguments.length === 1) {
-                return j(p.parent).replaceWith(p.value.arguments[0].body.body);
+
+                // convert `return` statement to `export default`
+                body = returnToExport(p.value.arguments[0].body.body);
+
+                return j(p.parent).replaceWith(body);
             }
 
             // define(['a', 'b', 'c'], function(a, b, c) { });
@@ -40,7 +58,7 @@ module.exports = function(file, api) {
                 importStatements[0].comments = comments;
 
                 // done
-                return j(p.parent).replaceWith(importStatements);
+                return j(p.parent).replaceWith(returnToExport(importStatements));
             }
 
         });

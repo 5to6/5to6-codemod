@@ -5,6 +5,10 @@ define(function() {
 	console.log('a');
 });
 
+define(function() {
+	return {};
+});
+
 /**
  * Hunger Games is real
  */
@@ -21,6 +25,7 @@ define(['a'], function() {
 
 define(['a'], function(a) {
 	console.log('I need you A', a.isUsed());
+	return a.b;
 });
 
 define(['a', 'b', 'c'], function(moduleA, moduleB, moduleC) {
