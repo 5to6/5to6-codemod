@@ -1,18 +1,29 @@
 {
-  "name": "5to6",
-  "version": "0.0.1",
+  "name": "5to6-codemod",
+  "version": "1.0.0",
   "description": "A collection of codemods that allow you to transform your js code from ES5 to ES6.",
   "main": "test.js",
   "scripts": {
     "test": "eslint . && mocha test/transforms test/utils.js"
   },
-  "author": "Jamis Charles",
-  "license": "ISC",
+  "contributors": ["Jamis Charles", "Jamund Ferguson"],
+  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "expect.js": "^0.3.1",
+    "eslint": "^1.0.0",
     "jscodeshift": "^0.3.8",
     "mocha": "^2.3.3",
     "recast": "^0.10.34"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5to6/codemod.git"
+  },
+  "bugs": {
+    "url": "https://github.com/5to6/codemod/issues"
+  },
+  "homepage": "https://github.com/5to6/codemod#readme"
 }

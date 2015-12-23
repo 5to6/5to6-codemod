@@ -1,4 +1,4 @@
-# 5to6
+# 5to6-codemod
 
 A collection of [codemods](https://medium.com/@cpojer/effective-javascript-codemods-5a6686bb46fb) that allow you to transform your
 js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodeshift).
@@ -6,7 +6,7 @@ js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodesh
 ## Usage
 
 1. `npm install -g jscodeshift`
-2. `npm install es6-codemod`
+2. `npm install 5to6-codemod`
 3. `jscodeshift -t node_modules/es6-codemod/transforms/[transform].js [files]`
 4. Review changes via `$ git diff`. Keep what you want, throw it out if you don't. Magic!
 
