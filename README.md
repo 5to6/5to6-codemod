@@ -8,14 +8,15 @@ js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodesh
 1. `npm install -g jscodeshift`
 2. `npm install 5to6-codemod`
 3. `jscodeshift -t node_modules/es6-codemod/transforms/[transform].js [files]`
-4. Review changes via `$ git diff`. Keep what you want, throw it out if you don't. Magic!
+4. Review changes via `git diff`. Keep what you want, throw it out if you don't. Magic!
 
 ## Transforms
 
-- `amd` - Transforms AMD style modules to ES6 imports/exports
-- `cjs` - Transforms CommonJS style `require()` calls to ES6 import statements
+- `amd` - Transforms AMD style modules to ES6 `import`/`export`
+- `cjs` - Transforms CommonJS style `require()` calls to ES6 `import` statements
 - `no-strict` - Removes "use strict" statements
-- `exports` - Move CommonJS style `module.exports` statements to ES6 export statements
+- `exports` - Move CommonJS style `module.exports` statements to ES6 `export` statements
+- `let` - Replace all `var` calls to use `let`
 
 ## Known issues
 
