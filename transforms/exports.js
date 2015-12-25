@@ -9,6 +9,19 @@ module.exports = function(file, api) {
 	var root = j(file.source);
 	var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
 
+	/**
+	 * Move `module.exports.thing()` to `thing()`
+	 */
+	function exportsCall(p) {
+		var functionCall = j.callExpression(p.value.callee.property, p.value.arguments);
+		console.log(util.toString(p), '=>', util.toString(functionCall));
+		functionCall.comments = p.comments;
+		j(p).replaceWith(functionCall);
+	}
+
+	/**
+	 * Move `module.exports.thing` to `export let thing`
+	 */
 	function exportsToExport(p) {
 		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
 		var declaration;
@@ -18,13 +31,28 @@ module.exports = function(file, api) {
 			declaration = j.variableDeclaration('let', [declator]);
 		}
 		var exportDecl = j.exportDeclaration(false, declaration);
-		console.log('module.exports.thing', util.toString(p), util.toString(exportDecl));
+		console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
+		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
 
+	/**
+	 * Move exports = module.exports to export default
+	 */
+	function exportsAndModuleExportsToDefault(p) {
+		var exportDecl = j.exportDeclaration(true, p.value.right.right);
+		console.log('exports = module.exports', util.toString(p.value.right.right), util.toString(exportDecl));
+		exportDecl.comments = p.parentPath.value.comments;
+		j(p.parentPath).replaceWith(exportDecl);
+	}
+
+	/**
+	 * Move `module.exports` to `export default`
+	 */
 	function exportsToDefault(p) {
 		var exportDecl = j.exportDeclaration(true, p.value.right);
 		console.log('module.exports', util.toString(p), util.toString(exportDecl));
+		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
 
@@ -89,13 +117,7 @@ module.exports = function(file, api) {
 	.filter(function(p) {
 		return p.parentPath.parentPath.name === 'body';
 	})
-	.forEach(function(p) {
-		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-		var declaration = j.variableDeclaration('let', [declator]);
-		var exportDecl = j.exportDeclaration(false, declaration);
-		console.log('export.thing', util.toString(p), util.toString(exportDecl));
-		j(p.parentPath).replaceWith(exportDecl);
-	});
+	.forEach(exportsToExport);
 
 	// find exports = module.exports = something....
 	root.find(j.AssignmentExpression, {
@@ -120,11 +142,29 @@ module.exports = function(file, api) {
 	.filter(function(p) {
 		return p.parentPath.parentPath.name === 'body';
 	})
-	.forEach(function exportsToDefault(p) {
-		var exportDecl = j.exportDeclaration(true, p.value.right.right);
-		console.log('exports = module.exports', util.toString(p.value.right.right), util.toString(exportDecl));
-		j(p.parentPath).replaceWith(exportDecl);
-	});
+	.forEach(exportsAndModuleExportsToDefault);
+
+	// find exports.house()
+	root.find(j.CallExpression, {
+		callee: {
+			type: 'MemberExpression',
+			object: { name: 'exports' }
+		}
+	})
+	.forEach(exportsCall);
+
+	// find module.exports.house()
+	root.find(j.CallExpression, {
+		callee: {
+			type: 'MemberExpression',
+			object: {
+				type: 'MemberExpression',
+				object: { name: 'module'},
+				property: { name: 'exports' }
+			}
+		}
+	})
+	.forEach(exportsCall);
 
 	// find var House = module.exports something....
 	root.find(j.AssignmentExpression, {
