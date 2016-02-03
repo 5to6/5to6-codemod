@@ -8,12 +8,13 @@
   },
   "contributors": ["Jamis Charles", "Jamund Ferguson"],
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "jscodeshift": "^0.3.8",
+    "recast": "^0.10.34"
+  },
   "devDependencies": {
     "eslint": "^1.0.0",
-    "jscodeshift": "^0.3.8",
-    "mocha": "^2.3.3",
-    "recast": "^0.10.34"
+    "mocha": "^2.3.3"
   },
   "directories": {
     "test": "test"
