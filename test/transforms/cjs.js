@@ -24,4 +24,11 @@ describe('CJS transform', function() {
     var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
     assert.equal(result, expectedSrc);
   });
+
+  it('should convert empty files', function() {
+    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-comment.before.js')).toString();
+    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-comment.after.js')).toString();
+    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
+    assert.equal(result, expectedSrc);
+  });
 });
