@@ -42,6 +42,14 @@ describe('util.getPropsFromRequire(ast)', function(){
     assert.deepEqual(result, expected);
   });
 
+
+  it('var { includes, pick } = require(\'lodash\') -> {variableName = [\'includes\', \'pick\'], moduleName: \'lodash\'}', function() {
+    var ast = toAST('var { includes, pick } = require(\'lodash\');')[0]; // returns an array of statements
+    var result = utils.getPropsFromRequire(ast);
+    var expected = { variableName: ['includes', 'pick'], moduleName: 'lodash' };
+
+    assert.deepEqual(result, expected);
+  });
 });
 
 describe('util.createImportStatement(moduleName [, variableName])', function(){
@@ -74,8 +82,12 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
     assert.deepEqual(result, expected);
   });
 
+  it('-> `import {includes, omit} from \'lodash\'` when passed 2 params (second one being an array of strings)', function() {
+    var result = toString(utils.createImportStatement('lodash', ['includes', 'omit']));
+    var expected = 'import {includes, omit} from \'lodash\';';
 
-
+    assert.deepEqual(result, expected);
+  });
 });
 
 // unroll single var statements?
@@ -143,4 +155,3 @@ function toString(ast) {
 function toAST(code) {
   return recast.parse(code).program.body;
 }
-
