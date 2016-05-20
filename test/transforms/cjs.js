@@ -22,7 +22,7 @@ describe('CJS transform', function() {
     var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs.before.js')).toString();
     var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs.after.js')).toString();
     var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
-    assert.equal(result, expectedSrc);
+    assert.equal(result.trim(), expectedSrc.trim());
   });
 
   it('should convert empty files', function() {
