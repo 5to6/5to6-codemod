@@ -54,17 +54,26 @@ var util = {
       return declaration;
     }
 
-    // else returns `import $ from 'jquery'`
-    nameIdentifier = j.identifier(variableName); //import var name
-    variable = j.importDefaultSpecifier(nameIdentifier);
+    // multiple variable names indicates a destructured import
+    if (Array.isArray(variableName)) {
+      var variableIds = variableName.map(function(v) {
+        return j.importSpecifier(j.identifier(v), j.identifier(v));
+      });
 
-    // if propName, use destructuring `import {pluck} from 'underscore'`
-    if (propName) {
-      idIdentifier = j.identifier(propName);
-      variable = j.importSpecifier(idIdentifier, nameIdentifier); // if both are same, one is dropped...
+      declaration = j.importDeclaration(variableIds, j.literal(moduleName));
+    } else {
+      // else returns `import $ from 'jquery'`
+      nameIdentifier = j.identifier(variableName); //import var name
+      variable = j.importDefaultSpecifier(nameIdentifier);
+
+      // if propName, use destructuring `import {pluck} from 'underscore'`
+      if (propName) {
+        idIdentifier = j.identifier(propName);
+        variable = j.importSpecifier(idIdentifier, nameIdentifier); // if both are same, one is dropped...
+      }
+
+      declaration = j.importDeclaration([variable], j.literal(moduleName) );
     }
-
-    declaration = j.importDeclaration([variable], j.literal(moduleName) );
 
     return declaration;
   },
@@ -114,6 +123,22 @@ var util = {
 
       moduleName = declarator.init.arguments[0].value;
       variableName = declarator.id.name;
+
+      // var $ = require('jquery');
+
+      if (declarator.id.type === 'Identifier') {
+        variableName = declarator.id.name;
+
+      // var { includes, pick } = require('lodash');
+      } else if (declarator.id.type === 'ObjectPattern') {
+        var modules = [];
+
+        declarator.id.properties.forEach(function(p) {
+          modules.push(p.key.name);
+        });
+
+        variableName = modules;
+      }
 
     } else {
       // console.log('ELSE');

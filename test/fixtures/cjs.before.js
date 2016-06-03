@@ -17,3 +17,4 @@ var jamis = 'bar',
 
 var routeTo = require('../routeHelper').routeTo;
 var fetch = require('../someUtil').pluck;
+var {includes, pick} = require('lodash');
