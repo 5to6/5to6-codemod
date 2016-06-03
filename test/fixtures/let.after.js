@@ -11,8 +11,8 @@ let x = y;
 let x, y, z;
 
 let x = 10,
-    y = 10,
     // middle comment
+    y = 10,
     a,
     b,
     c;

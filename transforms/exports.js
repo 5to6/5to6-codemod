@@ -2,7 +2,7 @@
  * exports - Replace module.exports calls with es6 exports
  */
 
-var util = require('../utils/main');
+// var util = require('../utils/main');
 
 module.exports = function(file, api) {
 	var j = api.jscodeshift;
@@ -14,7 +14,7 @@ module.exports = function(file, api) {
 	 */
 	function exportsCall(p) {
 		var functionCall = j.callExpression(p.value.callee.property, p.value.arguments);
-		console.log(util.toString(p), '=>', util.toString(functionCall));
+		// console.log(util.toString(p), '=>', util.toString(functionCall));
 		functionCall.comments = p.comments;
 		j(p).replaceWith(functionCall);
 	}
@@ -31,7 +31,7 @@ module.exports = function(file, api) {
 			declaration = j.variableDeclaration('let', [declator]);
 		}
 		var exportDecl = j.exportDeclaration(false, declaration);
-		console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
+		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
@@ -41,7 +41,7 @@ module.exports = function(file, api) {
 	 */
 	function exportsAndModuleExportsToDefault(p) {
 		var exportDecl = j.exportDeclaration(true, p.value.right.right);
-		console.log('exports = module.exports', util.toString(p.value.right.right), util.toString(exportDecl));
+		// console.log('exports = module.exports', util.toString(p.value.right.right), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
@@ -51,7 +51,7 @@ module.exports = function(file, api) {
 	 */
 	function exportsToDefault(p) {
 		var exportDecl = j.exportDeclaration(true, p.value.right);
-		console.log('module.exports', util.toString(p), util.toString(exportDecl));
+		// console.log('module.exports', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
@@ -89,7 +89,7 @@ module.exports = function(file, api) {
 	.forEach(function (p) {
 		var decl = j.variableDeclarator(p.parentPath.value.id, p.value.right);
 		var exportDecl = j.exportDeclaration(true, p.parentPath.value.id);
-		console.log(util.toString(decl), '\n', util.toString(exportDecl));
+		// console.log(util.toString(decl), '\n', util.toString(exportDecl));
 		j(p.parentPath).replaceWith(decl);
 		j(p.parentPath.parentPath.parentPath).insertAfter(exportDecl);
 	});
