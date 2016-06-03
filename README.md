@@ -17,6 +17,7 @@ js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodesh
 - `no-strict` - Removes "use strict" statements
 - `exports` - Move CommonJS style `module.exports` statements to ES6 `export` statements
 - `let` - Replace all `var` calls to use `let`
+- `simple-arrow` - Replace all function expressions with a body of a sole return statement into arrow functions
 
 ## Known issues
 
@@ -24,3 +25,4 @@ js code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodesh
 * `require()` calls in single var statements get reordered, and moved before the single var after conversion to import.
 * Can't automagically figure out when you want to use `import * as varName`.
 * End-of-line comments also missing in many situations
+* `simple-arrow` loses comments in the function expression body
