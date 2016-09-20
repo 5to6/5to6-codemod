@@ -11,6 +11,9 @@ module.exports = function(file, api) {
 
     // migrate away all the imports
     root.find(j.CallExpression, { callee: { name: 'require' } }) // find require() function calls
+        .filter(function(p) {
+          return p.parent.node.type !== 'CallExpression';
+        })
         .forEach(function(p) {
 
             var props, importStatement;
