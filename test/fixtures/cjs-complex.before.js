@@ -1,0 +1,1 @@
+var log = require('debug')('some:log');

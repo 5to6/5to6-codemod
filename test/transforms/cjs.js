@@ -31,4 +31,11 @@ describe('CJS transform', function() {
     var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
     assert.equal(result, expectedSrc);
   });
+
+  it('should convert a tricky require() usage ', function() {
+    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-complex.before.js')).toString();
+    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-complex.after.js')).toString();
+    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
+    assert.equal(result, expectedSrc);
+  });
 });
