@@ -4,6 +4,7 @@ import jamis from 'jquery';
 import $ from 'jquery';
 import $ from 'jquery';
 import 'something';
+fn(require('something'));
 
 var foo = bar;
 
