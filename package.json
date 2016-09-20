@@ -12,7 +12,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "jscodeshift": "^0.3.8",
+    "jscodeshift": "^0.3.28",
     "recast": "^0.10.34"
   },
   "devDependencies": {
