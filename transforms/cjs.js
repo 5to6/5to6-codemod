@@ -50,6 +50,11 @@ module.exports = function(file, api) {
 
             }
 
+            // require ('es6-promise').polyfill();
+            if (p.parent.value.type === 'MemberExpression') {
+                return
+            }
+
             // not part of a var statment
             // require('underscore');
             props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon

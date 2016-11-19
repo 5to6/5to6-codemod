@@ -31,4 +31,12 @@ describe('CJS transform', function() {
     var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
     assert.equal(result, expectedSrc);
   });
+
+  it('should convert weird files', function() {
+    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-weird.before.js')).toString();
+    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-weird.after.js')).toString();
+    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
+    assert.equal(result, expectedSrc);
+  });
+
 });
