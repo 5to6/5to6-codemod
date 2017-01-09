@@ -1,9 +1,12 @@
 // should be export default
 module.exports = { a: 'a' };
 
-// should be `export let` or `export function`
+// should be `export let things`
 exports.things = "a";
+// should be `export function thunks`
 exports.thunks = function thunks() {};
+// should be `export function thunks2`
+exports.thunks2 = function() {};
 
 // more or less the same as above
 module.exports = function thing() {};
