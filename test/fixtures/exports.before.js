@@ -3,10 +3,12 @@ module.exports = { a: 'a' };
 
 // should be `export let things`
 exports.things = "a";
-// should be `export function thunks`
-exports.thunks = function thunks() {};
+// should be `export function thunks1`
+exports.thunks1 = function thunks1() {};
 // should be `export function thunks2`
 exports.thunks2 = function() {};
+// should be `export function thunks3`
+exports.thunks3 = function thunkName() {};
 
 // more or less the same as above
 module.exports = function thing() {};

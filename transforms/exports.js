@@ -28,7 +28,9 @@ module.exports = function(file, api) {
 		var declaration;
 		if (p.value.right.type === 'FunctionExpression') {
 			declaration = p.value.right;
-			declaration.id = declaration.id || {type: 'Identifier', name: propertyName};
+      declaration.id = declaration.id || {type: 'Identifier'};
+      // we want the exported function to take the name of the exports.propertyName, even if it implies fn renaming
+      declaration.id.name = propertyName;
 		} else {
 			declaration = j.variableDeclaration('let', [declator]);
 		}

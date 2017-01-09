@@ -5,11 +5,14 @@ export default { a: 'a' };
 // should be `export let things`
 export let things = "a";
 
-// should be `export function thunks`
-export function thunks() {};
+// should be `export function thunks1`
+export function thunks1() {};
 
 // should be `export function thunks2`
 export function thunks2() {};
+
+// should be `export function thunks3`
+export function thunks3() {};
 
 // more or less the same as above
 export default function thing() {};
