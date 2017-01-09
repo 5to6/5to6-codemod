@@ -23,10 +23,12 @@ module.exports = function(file, api) {
 	 * Move `module.exports.thing` to `export let thing`
 	 */
 	function exportsToExport(p) {
-		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
+		var propertyName = p.value.left.property.name;
+		var declator = j.variableDeclarator(j.identifier(propertyName), p.value.right);
 		var declaration;
 		if (p.value.right.type === 'FunctionExpression') {
 			declaration = p.value.right;
+			declaration.id = declaration.id || {type: 'Identifier', name: propertyName};
 		} else {
 			declaration = j.variableDeclaration('let', [declator]);
 		}
