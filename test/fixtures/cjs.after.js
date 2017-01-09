@@ -15,6 +15,6 @@ import $ from 'jquery';
 // some comment
 var jamis = 'bar', bar, foo = 'bar';
 
-import {routeTo} from '../routeHelper';
-import {pluck as fetch} from '../someUtil';
-import {includes, pick} from 'lodash';
+import { routeTo } from '../routeHelper';
+import { pluck as fetch } from '../someUtil';
+import { includes, pick } from 'lodash';
