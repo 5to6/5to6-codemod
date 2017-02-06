@@ -24,4 +24,10 @@ describe('no-strict transform', function() {
 		var result = nsTransform({ source: src }, { jscodeshift: jscodeshift });
 		assert.equal(result, expectedSrc);
 	});
+	it('should not duplicate leading comment ', function() {
+		var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/no-strict-closure.before.js')).toString();
+		var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/no-strict-closure.after.js')).toString();
+		var result = nsTransform({ source: src }, { jscodeshift: jscodeshift });
+		assert.equal(result, expectedSrc);
+	});
 });
