@@ -70,21 +70,21 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 
   it('-> `import {pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'pluck', 'pluck'));
-    var expected = 'import {pluck} from \'jquery\';';
+    var expected = 'import { pluck } from \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
 
   it('-> `import {fetch as pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'fetch', 'pluck'));
-    var expected = 'import {pluck as fetch} from \'jquery\';';
+    var expected = 'import { pluck as fetch } from \'jquery\';';
 
     assert.deepEqual(result, expected);
   });
 
   it('-> `import {includes, omit} from \'lodash\'` when passed 2 params (second one being an array of strings)', function() {
     var result = toString(utils.createImportStatement('lodash', ['includes', 'omit']));
-    var expected = 'import {includes, omit} from \'lodash\';';
+    var expected = 'import { includes, omit } from \'lodash\';';
 
     assert.deepEqual(result, expected);
   });
