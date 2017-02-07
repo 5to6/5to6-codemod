@@ -1,3 +1,8 @@
+### 1.1.4
+
+- Update recast
+- Avoid stripping comments when removing use strict
+
 ### 1.1.3
 
 - Added fix for member expression in CJS rule
