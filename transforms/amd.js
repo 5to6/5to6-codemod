@@ -11,14 +11,19 @@ module.exports = function(file, api) {
 
     /**
      * Convert an `return` to `export default`.
-     * @param ast - Function body AST (Array)
+     * @param body - Function body AST (Array)
      */
     function returnToExport(body) {
         var exportStatement;
-        var possibleReturn = body[body.length - 1];
-        if (possibleReturn && possibleReturn.type === 'ReturnStatement') {
+        var possibleReturn = body.filter(function (node) {
+            return node.type === 'ReturnStatement'
+        }).reduce(function (prev, cur) {
+            return cur;
+        }, null);
+
+        if (possibleReturn && body.indexOf(possibleReturn) != -1) {
             exportStatement = j.exportDeclaration(true, possibleReturn.argument);
-            body[body.length - 1] = exportStatement;
+            body[body.indexOf(possibleReturn)] = exportStatement;
         }
         return body;
     }

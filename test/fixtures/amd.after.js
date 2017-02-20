@@ -3,6 +3,8 @@
  */
 console.log('a');
 export default {};
+export default {};
+console.log('last statement');
 
 /**
  * Hunger Games is real

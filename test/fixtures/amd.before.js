@@ -9,6 +9,11 @@ define(function() {
 	return {};
 });
 
+define(function() {
+	return {};
+	console.log('last statement');
+});
+
 /**
  * Hunger Games is real
  */
