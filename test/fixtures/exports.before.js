@@ -24,4 +24,3 @@ module.exports.pork('bacon');
 
 // don't do anything here
 exports = 'a';
-

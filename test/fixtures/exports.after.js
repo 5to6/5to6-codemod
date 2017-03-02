@@ -1,5 +1,4 @@
 // should be export default
-// should be export default
 export default { a: 'a' };
 
 // should be `export let` or `export function`
