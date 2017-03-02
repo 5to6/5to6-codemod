@@ -24,12 +24,7 @@ module.exports = function(file, api) {
 	 */
 	function exportsToExport(p) {
 		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-		var declaration;
-		if (p.value.right.type === 'FunctionExpression') {
-			declaration = p.value.right;
-		} else {
-			declaration = j.variableDeclaration('let', [declator]);
-		}
+		var declaration = j.variableDeclaration('let', [declator]);
 		var exportDecl = j.exportDeclaration(false, declaration);
 		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;

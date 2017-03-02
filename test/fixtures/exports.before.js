@@ -4,6 +4,7 @@ module.exports = { a: 'a' };
 // should be `export let` or `export function`
 exports.things = "a";
 exports.thunks = function thunks() {};
+exports.thunks2 = function() {};
 
 // more or less the same as above
 module.exports = function thing() {};

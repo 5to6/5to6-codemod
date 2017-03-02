@@ -5,7 +5,8 @@ export default { a: 'a' };
 // should be `export let` or `export function`
 export let things = "a";
 
-export function thunks() {};
+export let thunks = function thunks() {};
+export let thunks2 = function() {};
 
 // more or less the same as above
 export default function thing() {};
