@@ -7,7 +7,7 @@
 module.exports = function(file, api) {
 	var j = api.jscodeshift;
 	var root = j(file.source);
-	var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
+	var firstNode = root.find(j.Program).get('body', 0).node
 
 	/**
 	 * Move `module.exports.thing()` to `thing()`
@@ -24,12 +24,7 @@ module.exports = function(file, api) {
 	 */
 	function exportsToExport(p) {
 		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-		var declaration;
-		if (p.value.right.type === 'FunctionExpression') {
-			declaration = p.value.right;
-		} else {
-			declaration = j.variableDeclaration('let', [declator]);
-		}
+		var declaration = j.variableDeclaration('let', [declator]);
 		var exportDecl = j.exportDeclaration(false, declaration);
 		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
@@ -183,8 +178,11 @@ module.exports = function(file, api) {
 	.filter(function(p) { return p.parentPath.parentPath.name === 'body'; })
 	.forEach(exportsToExport);
 
-	// re-add comment to to the top
-	root.get().node.comments = leadingComment;
+	// re-add comment to to the top if necessary
+	var firstNode2 = root.find(j.Program).get('body', 0).node
+	if (firstNode !== firstNode2) {
+		firstNode2.comments = firstNode.leadingComments
+	}
 
 	// FIXME: make this a config to pass in?
 	return root.toSource({ quote: 'single' });
