@@ -52,6 +52,7 @@ var util = {
     // if no variable name, return `import 'jquery'`
     if (!variableName) {
       declaration = j.importDeclaration([], j.literal(moduleName) );
+      declaration.comments = comments
       return declaration;
     }
 
@@ -76,9 +77,7 @@ var util = {
       declaration = j.importDeclaration([variable], j.literal(moduleName) );
     }
 
-    if (comments) {
-        declaration.comments = comments
-    }
+    declaration.comments = comments
 
     return declaration;
   },
