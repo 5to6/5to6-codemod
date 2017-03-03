@@ -40,10 +40,11 @@ var util = {
    * @param moduleName {string} - Also called the source
    * @param variableName {string} - Also called a specifier
    * @param propName {string} - `b` in `require('a').b`
+   * @param comments {obj} - Comments AST object
    * @return {obj} - An AST object.
    * TODO: Add destructuring use cases...
    */
-  createImportStatement: function(moduleName, variableName, propName) {
+  createImportStatement: function(moduleName, variableName, propName, comments) {
     var declaration, variable, idIdentifier, nameIdentifier;
     // console.log('variableName', variableName);
     // console.log('moduleName', moduleName);
@@ -73,6 +74,10 @@ var util = {
       }
 
       declaration = j.importDeclaration([variable], j.literal(moduleName) );
+    }
+
+    if (comments) {
+        declaration.comments = comments
     }
 
     return declaration;

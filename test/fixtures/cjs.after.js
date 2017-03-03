@@ -1,7 +1,8 @@
 // CJS top comment
 
 import jamis from 'jquery';
-import $ from 'jquery';
+
+import $ from 'jquery'; // end of line comment will get eaten no more
 import $ from 'jquery';
 import 'something';
 fn(require('something'));

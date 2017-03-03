@@ -4,108 +4,56 @@
 
 var util = require('../utils/main');
 
-module.exports = function(file, api) {
-    var j = api.jscodeshift;
-    var root = j(file.source);
-    var originalLeadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
+module.exports = function tranformer(file, api) {
+	var j = api.jscodeshift;
+	var root = j(file.source);
 
-    // migrate away all the imports
-    root.find(j.CallExpression, { callee: { name: 'require' } }) // find require() function calls
-        .filter(function(p) {
-          return p.parent.node.type !== 'CallExpression';
-        })
-        .forEach(function(p) {
+	// require('a')
+	root.find(j.ExpressionStatement, { expression: { callee: { name: 'require' }}})
+		.forEach(expressionStatement => {
+			if (!isParentRoot(expressionStatement)) return
+			j(expressionStatement).replaceWith(convertRequire(expressionStatement, expressionStatement.node.comments));
+		})
 
-            var props, importStatement;
+	// var ... = require('y')
+	root.find(j.VariableDeclarator, { init: {callee: { name: 'require' }}})
+		.forEach(replaceDeclarator.bind(undefined, j))
 
-            // is this require() part of a var declaration?
-            // var $ = require('jquery');
-            var varParent = findVarParent(p);
+	// var ... = require('y').x
+	root.find(j.VariableDeclarator, { init: { object: { callee: { name: 'require' }}}})
+		.forEach(replaceDeclarator.bind(undefined, j))
 
-            // am I part of a single var statement?
-            if (varParent && isSingleVar(varParent)) {
-                // wrap the variableDeclarator in a VariableDeclaration (for more consistent prop extraction)
-                var varStatement = j.variableDeclaration('var', [p.parentPath.value]);
-                props = util.getPropsFromRequire(varStatement);
-
-                importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
-
-                // insert the new import statement AFTER the singleVar and and remove the require() from the single var.
-                //j(varParent).insertAfter(importStatement);
-                // HACK: Using before for now, to avoid it mangling the whitespace after the var statement.
-                // This will cause problems if the single var statement contains deps that the other els depend on
-                j(p.parentPath.parent).insertBefore(importStatement);
-                j(p.parent).remove();
-
-                return;
-
-            } else if (varParent) {
-                props = util.getPropsFromRequire(varParent);
-                importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
-
-                // reach higher in the tree to replace the var statement with an import. Needed so we don't just
-                // replace require() with the import statement.
-                j(varParent).replaceWith(importStatement);
-                return;
-
-            }
-
-            // require ('es6-promise').polyfill();
-            if (p.parent.value.type === 'MemberExpression') {
-                return
-            }
-
-            // not part of a var statment
-            // require('underscore');
-            props = util.getPropsFromRequire(p.parent); // use.p.parent so it includes the semicolon
-            importStatement = util.createImportStatement(props.moduleName, props.variableName, props.propName);
-
-            j(p.parent).replaceWith(importStatement);
-            return;
-        });
-
-    // re-add comment to to the top
-    var currentLeadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
-    if (!currentLeadingComment && originalLeadingComment) {
-        root.get().node.comments = originalLeadingComment;
-    }
-
-    return root.toSource({ quote: 'single' });
-};
-
-
-/**
- * LOCAL HELPERS
- *
- */
-// helpers... TODO: Decide if these should go in the main helpers or just here...
-
-/**
- * @param node {VariableDeclaration} - Expecting to see the parent node.
- *
- */
-function isSingleVar(node) {
-    return (node.value.declarations.length > 1);
+	return root.toSource({ quote: 'single' });
 }
 
-/**
- * Traverse up the tree until you find the top, or the var statement that's the parent
- * of the node you're passing in.
- * Needed for single var statments especially
- *
- */
-function findVarParent(node) {
-    // traverse up the tree until end, or you find var declaration
-    while(node.parentPath) {
-        node = node.parentPath;
-        //console.log('node', node)
+function isParentRoot(path) {
+  return path.parent.node.type === 'Program'
+}
 
-        if (node.value.type === 'VariableDeclaration') {
-            //console.log('decs', node.value.declarations.length);
-            // console.log('singleVarValue', node);
-            return node;
-        }
-    }
+function convertRequire (ast, comments) {
+	var props = util.getPropsFromRequire(ast);
+	return util.createImportStatement(
+		props.moduleName,
+		props.variableName,
+		props.propName,
+		comments
+	);
+}
 
-    return false;
+function replaceDeclarator (j, variableDeclarator) {
+	var variableDeclaration = variableDeclarator.parent
+	if (!isParentRoot(variableDeclaration)) return
+
+	// create unique variableDeclaration for each declarator (for more consistent prop extraction)
+	var varStatement = j.variableDeclaration('var', [variableDeclarator.node]);
+	var isSingleDeclarator = variableDeclaration.node.declarations.length === 1
+
+	if (isSingleDeclarator) {
+		j(variableDeclaration).replaceWith(convertRequire(varStatement, variableDeclaration.node.comments))
+	} else {
+		// HACK: Using before for now, to avoid it mangling the whitespace after the var statement.
+		// This will cause problems if the single var statement contains deps that the other els depend on
+		j(variableDeclaration).insertBefore(convertRequire(varStatement));
+		j(variableDeclarator).remove();
+	}
 }
