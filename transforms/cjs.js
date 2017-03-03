@@ -10,13 +10,13 @@ module.exports = function tranformer(file, api) {
 
 	// require('a')
 	root.find(j.ExpressionStatement, { expression: { callee: { name: 'require' }}})
-		.forEach(expressionStatement => {
+		.forEach(function (expressionStatement) {
 			if (!isParentRoot(expressionStatement)) return
 			j(expressionStatement).replaceWith(convertRequire(expressionStatement, expressionStatement.node.comments));
 		})
 
 	// var ... = require('y')
-	root.find(j.VariableDeclarator, { init: {callee: { name: 'require' }}})
+	root.find(j.VariableDeclarator, { init: { callee: { name: 'require' }}})
 		.forEach(replaceDeclarator.bind(undefined, j))
 
 	// var ... = require('y').x
