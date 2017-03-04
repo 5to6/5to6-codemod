@@ -23,6 +23,29 @@ module.exports = function tranformer(file, api) {
 	root.find(j.VariableDeclarator, { init: { object: { callee: { name: 'require' }}}})
 		.forEach(replaceDeclarator.bind(undefined, j))
 
+	// var x = { x: require('...'), y: require('...'), ... }
+	root.find(j.VariableDeclaration, { declarations: [{ init: { type: 'ObjectExpression' }}] })
+		.forEach(function (variableDeclaration) {
+			if (!isParentRoot(variableDeclaration)) return
+
+			// only look at properties with require('...')
+			j(variableDeclaration)
+				.find(j.Property, { value: { callee: { name: 'require' }}})
+				.forEach(function (property) {
+					// generate import statement
+					var variableName = property.get('key', 'name').value
+					var moduleName = property.get('value', 'arguments', 0, 'value').value
+					var importStatement = util.createImportStatement(moduleName, variableName, undefined, property.node.comments)
+
+					// modify property
+					var newProp = api.jscodeshift.property(property.node.kind, property.node.key, property.node.key)
+					newProp.shorthand = true
+
+					j(variableDeclaration).insertBefore(importStatement)
+					j(property).replaceWith(newProp)
+				})
+		})
+
 	return root.toSource({ quote: 'single' });
 }
 
