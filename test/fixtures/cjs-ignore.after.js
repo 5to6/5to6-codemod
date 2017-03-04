@@ -1,7 +1,6 @@
-var x = require('z')
-require ('a')
+// top level comment
+fn(require('ignore-func-call'));
 require ('es6-promise').polyfill();
-require ('b').c();
 describe('foo', function () {
     var Foo = require('Foo')
     beforeEach(function () {
@@ -9,7 +8,6 @@ describe('foo', function () {
         var test = new fn(require('foo'))
     })
 })
-var LOOKUP = {
-    foo: require('foo'),
+var x = {
     get bar () { return require('bar') },
 }
