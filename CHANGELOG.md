@@ -1,3 +1,8 @@
+### 1.2.0
+
+- Improved AMD export (edge cases)
+- Improved anonymous function exporting
+
 ### 1.1.4
 
 - Update recast
