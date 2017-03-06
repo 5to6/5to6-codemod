@@ -7,7 +7,7 @@ var util = require('../utils/main');
 module.exports = function(file, api) {
     var j = api.jscodeshift;
     var root = j(file.source);
-    var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
+    var originalLeadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
 
     // migrate away all the imports
     root.find(j.CallExpression, { callee: { name: 'require' } }) // find require() function calls
@@ -65,7 +65,10 @@ module.exports = function(file, api) {
         });
 
     // re-add comment to to the top
-    root.get().node.comments = leadingComment;
+    var currentLeadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
+    if (!currentLeadingComment && originalLeadingComment) {
+        root.get().node.comments = originalLeadingComment;
+    }
 
     return root.toSource({ quote: 'single' });
 };
