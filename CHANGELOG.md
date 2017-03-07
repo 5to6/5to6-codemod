@@ -1,3 +1,6 @@
+### 1.3.0
+- Avoid comment duplication 
+
 ### 1.2.0
 
 - Improved AMD export (edge cases)
