@@ -1,3 +1,7 @@
+
+### 1.4.0
+- Restrict import conversion to top-level require
+
 ### 1.3.0
 - Avoid comment duplication 
 
