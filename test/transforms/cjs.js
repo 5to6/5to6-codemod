@@ -18,25 +18,16 @@ var cjsTransform = require('../../transforms/cjs');
  *
  */
 describe('CJS transform', function() {
-  it('should convert require(\'jquery\') -> import \'jquery\' ', function() {
-    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs.before.js')).toString();
-    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs.after.js')).toString();
-    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
-    assert.equal(result.trim(), expectedSrc.trim());
-  });
-
-  it('should convert empty files', function() {
-    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-comment.before.js')).toString();
-    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-comment.after.js')).toString();
-    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
-    assert.equal(result, expectedSrc);
-  });
-
-  it('should convert weird files', function() {
-    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-weird.before.js')).toString();
-    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs-weird.after.js')).toString();
-    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
-    assert.equal(result, expectedSrc);
-  });
-
+  it('require("x")', helper.bind(this, 'cjs-standalone'))
+  it('var ... = require("x")', helper.bind(this, 'cjs-declaration'))
+  it('var ... = require("y").x', helper.bind(this, 'cjs-object'))
+  it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'cjs-mapper'))
+  it('should ignore requires deepr than top-level', helper.bind(this, 'cjs-ignore'))
 });
+
+function helper (name) {
+  var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/' + name + '.before.js')).toString();
+  var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/' + name + '.after.js')).toString();
+  var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
+  assert.equal(result.trim(), expectedSrc.trim());
+}
