@@ -69,7 +69,7 @@ var util = {
       variable = j.importDefaultSpecifier(nameIdentifier);
 
       // if propName, use destructuring `import {pluck} from 'underscore'`
-      if (propName) {
+      if (propName && propName !== 'default') {
         idIdentifier = j.identifier(propName);
         variable = j.importSpecifier(idIdentifier, nameIdentifier); // if both are same, one is dropped...
       }

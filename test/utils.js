@@ -68,6 +68,13 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
     assert.deepEqual(result, expected);
   });
 
+  it('-> `import foo from \'bar\'` when passed 3 params where propName is default', function() {
+    var result = toString(utils.createImportStatement('bar', 'foo', 'default'));
+    var expected = 'import foo from \'bar\';';
+
+    assert.deepEqual(result, expected);
+  });
+
   it('-> `import {pluck} from \'jquery\'` when passed 3 params', function() {
     var result = toString(utils.createImportStatement('jquery', 'pluck', 'pluck'));
     var expected = 'import { pluck } from \'jquery\';';
