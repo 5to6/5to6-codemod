@@ -1,22 +1,22 @@
 // should be export default
 export default { a: 'a' };
 
-// should be `export let` or `export function`
-export let things = "a";
+// should be `export const` or `export function`
+export const things = "a";
 
-export let thunks = function thunks() {};
-export let thunks2 = function() {};
+export const thunks = function thunks() {};
+export const thunks2 = function() {};
 
 // more or less the same as above
 export default function thing() {};
 
-export let horse = "morse";
+export const horse = "morse";
 
 // in this case we can mix `default` and the others
 export default function() {};
 
-export let CONSTANT_NAME = 'HOUSE';
-export let isAnnoying = true;
+export const CONSTANT_NAME = 'HOUSE';
+export const isAnnoying = true;
 
 // A common enough case that is a bit weird... will need to be two lines
 var House = function() {};

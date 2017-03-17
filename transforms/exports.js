@@ -20,11 +20,11 @@ module.exports = function(file, api) {
 	}
 
 	/**
-	 * Move `module.exports.thing` to `export let thing`
+	 * Move `module.exports.thing` to `export const thing`
 	 */
 	function exportsToExport(p) {
 		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-		var declaration = j.variableDeclaration('let', [declator]);
+		var declaration = j.variableDeclaration('const', [declator]);
 		var exportDecl = j.exportDeclaration(false, declaration);
 		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
