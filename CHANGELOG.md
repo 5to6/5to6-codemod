@@ -1,3 +1,5 @@
+### 1.5.0
+- Exported functions not const instead of let
 
 ### 1.4.0
 - Restrict import conversion to top-level require
