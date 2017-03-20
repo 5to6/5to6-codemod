@@ -104,7 +104,7 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 // Than can then be processed individually, and replaced wholesale...
 describe('util.singleVarToExpressions(ast)', function(){
 
-  it('should turn a single var statement into an array of expressions\'}', function() {
+  it('should turn a single var statement into an array of expressions', function() {
     var string = ''
     + 'var jamis = \'bar\',\n'
     + ' _ = require(\'lodash\'),\n'
