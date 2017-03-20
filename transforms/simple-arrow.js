@@ -19,13 +19,16 @@
 
 */
 
+var util = require('../utils/main');
+
 function filterTargetFns (p) {
   return p.node.body.type === 'BlockStatement'
   && p.node.body.body.length === 1
   && p.node.body.body[0].type === 'ReturnStatement';
 }
 
-module.exports = function(file, api) {
+module.exports = function(file, api, options) {
+  var config = util.getConfig(options);
   var j = api.jscodeshift;
 
   return j(file.source)
@@ -37,5 +40,5 @@ module.exports = function(file, api) {
         path.node.body.body[0].argument
       )
     )
-    .toSource();
+    .toSource(config);
 };

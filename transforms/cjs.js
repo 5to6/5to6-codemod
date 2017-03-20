@@ -4,7 +4,8 @@
 
 var util = require('../utils/main');
 
-module.exports = function tranformer(file, api) {
+module.exports = function transformer(file, api, options) {
+	var config = util.getConfig(options);
 	var j = api.jscodeshift;
 	var root = j(file.source);
 
@@ -46,7 +47,7 @@ module.exports = function tranformer(file, api) {
 				})
 		})
 
-	return root.toSource({ quote: 'single' });
+	return root.toSource(config);
 }
 
 function isParentRoot(path) {

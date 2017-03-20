@@ -2,9 +2,10 @@
  * exports - Replace module.exports calls with es6 exports
  */
 
-// var util = require('../utils/main');
+var util = require('../utils/main');
 
-module.exports = function(file, api) {
+module.exports = function(file, api, options) {
+	var config = util.getConfig(options);
 	var j = api.jscodeshift;
 	var root = j(file.source);
 	var firstNode = root.find(j.Program).get('body', 0).node
@@ -184,6 +185,5 @@ module.exports = function(file, api) {
 		firstNode2.comments = firstNode.leadingComments
 	}
 
-	// FIXME: make this a config to pass in?
-	return root.toSource({ quote: 'single' });
+	return root.toSource(config);
 };

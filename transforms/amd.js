@@ -4,7 +4,8 @@
 
 var util = require('../utils/main');
 
-module.exports = function(file, api) {
+module.exports = function(file, api, options) {
+    var config = util.getConfig(options);
     var j = api.jscodeshift;
     var root = j(file.source);
     var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
@@ -69,6 +70,5 @@ module.exports = function(file, api) {
         // re-add comment to to the top
         root.get().node.comments = leadingComment;
 
-        // FIXME: make this a config to pass in?
-        return root.toSource({ quote: 'single' });
+        return root.toSource(config);
 };
