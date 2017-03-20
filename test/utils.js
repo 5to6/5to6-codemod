@@ -130,6 +130,40 @@ describe('util.singleVarToExpressions(ast)', function(){
   });
 });
 
+describe('util.getDefaultConfig', function(){
+  var defaultConfig = utils.getDefaultConfig();
+
+  it('should return an object', function() {
+    assert(typeof defaultConfig, 'object');
+  });
+
+  it('should define a default "quote" value of "single"', function() {
+    assert(defaultConfig.quote, 'single');
+  })
+});
+
+describe('util.getConfig', function(){
+  var defaultConfig = utils.getDefaultConfig();
+
+  it('should equal the default config given no inputs', function() {
+    assert.deepEqual(defaultConfig, utils.getConfig());
+  });
+
+  it('should equal the default config given invalid, non-object inputs', function() {
+    assert.deepEqual(defaultConfig, utils.getConfig(null));
+    assert.deepEqual(defaultConfig, utils.getConfig(undefined));
+    assert.deepEqual(defaultConfig, utils.getConfig(14));
+    assert.deepEqual(defaultConfig, utils.getConfig('14'));
+    assert.deepEqual(defaultConfig, utils.getConfig(['14']));
+  });
+
+  it('should be able to override a default config value', function() {
+    var config = utils.getConfig({ quote: 'double' })
+    var expected = { quote: 'double' };
+    assert.deepEqual(config, expected);
+  })
+});
+
 /******************************************
  * Test Helpers...
  ******************************************/

@@ -162,6 +162,31 @@ var util = {
     }
 
     return obj;
+  },
+
+  getDefaultConfig: function() {
+    return {
+      quote: 'single'
+    };
+  },
+
+  getConfig: function(options) {
+    var defaultConfig = util.getDefaultConfig();
+    var out = {};
+    var keys1 = Object.keys(defaultConfig);
+    for (var i = 0; i < keys1.length; i++) {
+      var key1 = keys1[i];
+      out[key1] = defaultConfig[key1];
+    }
+    // WAT: typeof null === 'object' === true
+    if (options !== null && typeof options === 'object' && !Array.isArray(options)) {
+      var keys2 = Object.keys(options);
+      for (var j = 0; j < keys2.length; j++) {
+        var key2 = keys2[j];
+        out[key2] = options[key2];
+      }
+    }
+    return out;
   }
 
 };
