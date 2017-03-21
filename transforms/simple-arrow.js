@@ -28,7 +28,6 @@ function filterTargetFns (p) {
 }
 
 module.exports = function(file, api, options) {
-  var config = util.getConfig(options);
   var j = api.jscodeshift;
 
   return j(file.source)
@@ -40,5 +39,5 @@ module.exports = function(file, api, options) {
         path.node.body.body[0].argument
       )
     )
-    .toSource(config);
+    .toSource(util.getRecastConfig(options));
 };

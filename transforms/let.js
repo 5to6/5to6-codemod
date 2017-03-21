@@ -8,7 +8,6 @@
  * Will convert var statements to let
  */
 module.exports = function(file, api, options) {
-	var config = util.getConfig(options);
 	var j = api.jscodeshift;
 	var root = j(file.source);
 
@@ -19,5 +18,5 @@ module.exports = function(file, api, options) {
 		return j(p).replaceWith(letStatement);
 	});
 
-	return root.toSource(config);
+	return root.toSource(util.getRecastConfig(options));
 };

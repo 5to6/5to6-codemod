@@ -5,7 +5,6 @@
 var util = require('../utils/main');
 
 module.exports = function(file, api, options) {
-	var config = util.getConfig(options);
 	var j = api.jscodeshift;
 	var root = j(file.source);
 	var firstNode = root.find(j.Program).get('body', 0).node
@@ -185,5 +184,5 @@ module.exports = function(file, api, options) {
 		firstNode2.comments = firstNode.leadingComments
 	}
 
-	return root.toSource(config);
+	return root.toSource(util.getRecastConfig(options));
 };

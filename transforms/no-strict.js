@@ -8,7 +8,6 @@ var util = require('../utils/main');
  * Will convert require() statements in a js file to es6 import statements
  */
 module.exports = function(file, api, options) {
-	var config = util.getConfig(options);
 	var j = api.jscodeshift;
 	var root = j(file.source);
 	var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
@@ -27,5 +26,5 @@ module.exports = function(file, api, options) {
 		root.get().node.comments = leadingComment;
 	}
 
-	return root.toSource(config);
+	return root.toSource(util.getRecastConfig(options));
 };

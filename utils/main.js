@@ -164,31 +164,76 @@ var util = {
     return obj;
   },
 
-  getDefaultConfig: function() {
+  getValidRecastArgs: function () {
+    return [
+      'esprima',
+      'inputSourceMap',
+      'lineTerminator',
+      'quote',
+      'range',
+      'reuseWhitespace',
+      'sourceFileName',
+      'sourceMapName',
+      'sourceRoot',
+      'tabWidth',
+      'tolerant',
+      'trailingComma',
+      'useTabs',
+      'wrapColumn'
+    ];
+  },
+
+  isRecastArg: function(item) {
+    return util.getValidRecastArgs().indexOf(item) >= 0;
+  },
+
+  getDefaultTransformConfig: function() {
+    return {
+    };
+  },
+
+  getDefaultRecastConfig: function() {
     return {
       quote: 'single'
     };
   },
 
-  getConfig: function(options) {
-    var defaultConfig = util.getDefaultConfig();
+  getConfig(options, defaultConfig, keyFilterFunction) {
+    if (keyFilterFunction === undefined) {
+      keyFilterFunction = function() { return true; };
+    }
     var out = {};
     var keys1 = Object.keys(defaultConfig);
     for (var i = 0; i < keys1.length; i++) {
       var key1 = keys1[i];
-      out[key1] = defaultConfig[key1];
+      if (keyFilterFunction(key1)) {
+        out[key1] = defaultConfig[key1];
+      }
     }
     // WAT: typeof null === 'object' === true
     if (options !== null && typeof options === 'object' && !Array.isArray(options)) {
       var keys2 = Object.keys(options);
       for (var j = 0; j < keys2.length; j++) {
         var key2 = keys2[j];
-        out[key2] = options[key2];
+        if (keyFilterFunction(key2)) {
+          out[key2] = options[key2];
+        }
       }
     }
     return out;
-  }
+  },
 
+  getTransformConfig: function(options) {
+    return util.getConfig(options, util.getDefaultTransformConfig(), function(key) {
+      return !util.isRecastArg(key);
+    })
+  },
+
+  getRecastConfig: function(options) {
+    return util.getConfig(options, util.getDefaultRecastConfig(), function(key) {
+      return util.isRecastArg(key);
+    })
+  }
 };
 
 
