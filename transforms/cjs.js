@@ -46,6 +46,21 @@ module.exports = function transformer(file, api, options) {
 				})
 		})
 
+	// var x = require("y")( ... )
+	root.find(j.VariableDeclarator, {
+    init: {
+      type: 'CallExpression',
+      callee: {
+        callee: {
+          name: 'require'
+        }
+      }
+    }
+  }).filter(function(vdRef) {
+    var callExpression = vdRef.value.init;
+    return 'arguments' in callExpression && Array.isArray(callExpression.arguments);
+  }).forEach(replaceCalledDeclarator.bind(undefined, j));
+
 	return root.toSource(util.getRecastConfig(options));
 }
 
@@ -79,4 +94,48 @@ function replaceDeclarator (j, variableDeclarator) {
 		j(variableDeclaration).insertBefore(convertRequire(varStatement));
 		j(variableDeclarator).remove();
 	}
+}
+
+function replaceCalledDeclarator(j, variableDeclarator) {
+	var id = variableDeclarator.value.id
+	var factoryName;
+	if (id.type === 'Identifier') {
+		factoryName = id.name + 'Factory';
+	} else if (id.type === 'ObjectPattern') {
+		factoryName = id.properties.map(function(property){ return property.key.name }).join('') + 'Factory';
+	}
+	var calledArgs = variableDeclarator.value.init.arguments;
+	var importSource = variableDeclarator.value.init.callee.arguments[0].value;
+	var newImport = createImport(j, factoryName, importSource);
+	var newDeclaration = createCalledDeclaration(j, id, factoryName, calledArgs)
+	variableDeclarator.parent.insertBefore(newImport, newDeclaration);
+
+	if (variableDeclarator.parent.value.declarations.length === 1) {
+		if ('comments' in variableDeclarator.parent.value) {
+			newImport.comments = variableDeclarator.parent.value.comments;
+		}
+		j(variableDeclarator.parent).remove();
+	} else {
+		if ('comments' in variableDeclarator.value) {
+			newImport.comments = variableDeclarator.value.comments;
+		}
+		j(variableDeclarator).remove();
+	}
+}
+
+function createImport(j, name, source) {
+	return j.importDeclaration(
+		[j.importDefaultSpecifier(j.identifier(name))],
+		j.literal(source)
+	);
+}
+
+function createCalledDeclaration(j, id, callee, args) {
+	return j.variableDeclaration('const', [j.variableDeclarator(
+		id,
+		j.callExpression(
+			j.identifier(callee),
+			args
+		)
+	)]);
 }

@@ -21,6 +21,7 @@ describe('CJS transform', function() {
   it('require("x")', helper.bind(this, 'standalone'))
   it('var ... = require("x")', helper.bind(this, 'declaration'))
   it('var ... = require("y").x', helper.bind(this, 'object'))
+  it('var ... = require("y")( ... )', helper.bind(this, 'called'))
   it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'mapper'))
   it('should ignore requires deepr than top-level', helper.bind(this, 'ignore'))
 });
