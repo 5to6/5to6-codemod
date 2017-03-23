@@ -5,7 +5,7 @@
  */
 var recast = require('recast');
 var assert = require('assert');
-var assign = require('lodash.assign');
+var assign = require('lodash/assign');
 
 /**
  * LOCAL DEPS
