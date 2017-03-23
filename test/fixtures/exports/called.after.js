@@ -1,0 +1,3 @@
+// this will be tricky and may require function hoisting...
+house('mouse');
+pork('bacon');
