@@ -2,10 +2,12 @@
  * no-strict - Remove "use strict" statements from files.
  */
 
+var util = require('../utils/main');
+
 /**
  * Will convert require() statements in a js file to es6 import statements
  */
-module.exports = function(file, api) {
+module.exports = function(file, api, options) {
 	var j = api.jscodeshift;
 	var root = j(file.source);
 	var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
@@ -24,5 +26,5 @@ module.exports = function(file, api) {
 		root.get().node.comments = leadingComment;
 	}
 
-	return root.toSource({ quote: 'single' });
+	return root.toSource(util.getRecastConfig(options));
 };

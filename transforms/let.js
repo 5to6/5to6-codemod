@@ -2,10 +2,12 @@
  * let - Convert `var` statements to `let`
  */
 
+ var util = require('../utils/main');
+
 /**
  * Will convert var statements to let
  */
-module.exports = function(file, api) {
+module.exports = function(file, api, options) {
 	var j = api.jscodeshift;
 	var root = j(file.source);
 
@@ -16,5 +18,5 @@ module.exports = function(file, api) {
 		return j(p).replaceWith(letStatement);
 	});
 
-	return root.toSource({ quote: 'single' });
+	return root.toSource(util.getRecastConfig(options));
 };

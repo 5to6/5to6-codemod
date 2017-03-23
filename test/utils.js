@@ -5,6 +5,7 @@
  */
 var recast = require('recast');
 var assert = require('assert');
+var assign = require('lodash/assign');
 
 /**
  * LOCAL DEPS
@@ -104,7 +105,7 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 // Than can then be processed individually, and replaced wholesale...
 describe('util.singleVarToExpressions(ast)', function(){
 
-  it('should turn a single var statement into an array of expressions\'}', function() {
+  it('should turn a single var statement into an array of expressions', function() {
     var string = ''
     + 'var jamis = \'bar\',\n'
     + ' _ = require(\'lodash\'),\n'
@@ -129,6 +130,134 @@ describe('util.singleVarToExpressions(ast)', function(){
     assert.deepEqual(result, expected);
   });
 });
+
+describe('util.getValidRecastArgs', function(){
+  var validRecastArgs = utils.getValidRecastArgs();
+
+  it('should have 14 valid arguments', function() {
+    assert.equal(validRecastArgs.length, 14);
+  });
+});
+
+describe('util.getDefaultTransformConfig', function(){
+  var defaultTransformConfig = utils.getDefaultTransformConfig();
+
+  it('should return an object', function() {
+    assert.equal(typeof defaultTransformConfig, 'object');
+  });
+
+  it('should not have any defined properties', function() {
+    assert.equal(Object.keys(defaultTransformConfig).length, 0);
+  })
+});
+
+describe('util.getDefaultRecastConfig', function(){
+  var defaultRecastConfig = utils.getDefaultRecastConfig();
+
+  it('should return an object', function() {
+    assert.equal(typeof defaultRecastConfig, 'object');
+  });
+
+  it('should define a default "quote" value of "single"', function() {
+    assert.equal(defaultRecastConfig.quote, 'single');
+  })
+});
+
+describe('util.getConfig', function(){
+  var defaultConfig = {
+    example: 42,
+    sample: 'a'
+  };
+
+  it('should override default config with provided input', function() {
+    var config = utils.getConfig({ example: 43, another: 'b' }, defaultConfig);
+    assert.equal(config.example, 43);
+    assert.equal(config.sample, 'a');
+    assert.equal(config.another, 'b');
+  })
+});
+
+describe('util.getTransformConfig', function() {
+  var defaultConfig = utils.getDefaultTransformConfig();
+
+  it('should equal the default config given no inputs', function() {
+    assert.deepEqual(utils.getTransformConfig(), defaultConfig);
+  });
+
+  it('should equal the default config given invalid, non-object inputs', function() {
+    assert.deepEqual(utils.getTransformConfig(null), defaultConfig);
+    assert.deepEqual(utils.getTransformConfig(undefined), defaultConfig);
+    assert.deepEqual(utils.getTransformConfig(14), defaultConfig);
+    assert.deepEqual(utils.getTransformConfig('14'), defaultConfig);
+    assert.deepEqual(utils.getTransformConfig(['14']), defaultConfig);
+  });
+
+  it('should be able to override a default config value', function() {
+    var config = utils.getTransformConfig({ example: 'double' });
+
+    var expectedConfig = assign({}, defaultConfig, {
+      example: 'double'
+    });
+
+    assert.deepEqual(config, expectedConfig);
+  });
+
+  it('should filter out recast keys', function() {
+    var options = {
+      lineTerminator: true,
+      reuseWhitespace: true,
+      someKey: true,
+      sourceMapName: true,
+      tabWidth: true
+    };
+    var expected = { someKey: true };
+    assert.deepEqual(utils.getTransformConfig(options), expected);
+  });
+});
+
+describe('util.getRecastConfig', function() {
+  var defaultConfig = utils.getDefaultRecastConfig();
+
+  it('should equal the default config given no inputs', function() {
+    assert.deepEqual(utils.getRecastConfig(), defaultConfig);
+  });
+
+  it('should equal the default config given invalid, non-object inputs', function() {
+    assert.deepEqual(utils.getRecastConfig(null), defaultConfig);
+    assert.deepEqual(utils.getRecastConfig(undefined), defaultConfig);
+    assert.deepEqual(utils.getRecastConfig(14), defaultConfig);
+    assert.deepEqual(utils.getRecastConfig('14'), defaultConfig);
+    assert.deepEqual(utils.getRecastConfig(['14']), defaultConfig);
+  });
+
+  it('should be able to override a default config value', function() {
+    var config = utils.getRecastConfig({ quote: 'double' });
+
+    var expectedConfig = assign({}, defaultConfig, {
+      quote: 'double'
+    });
+
+    assert('quote' in defaultConfig);
+    assert.deepEqual(config, expectedConfig);
+  });
+
+  it('should only accept recast keys', function() {
+    var options = {
+      lineTerminator: true,
+      reuseWhitespace: true,
+      someKey: true, // Should not be present in recast config
+      sourceMapName: true,
+      tabWidth: true
+    };
+    var expected = assign({}, defaultConfig, {
+      lineTerminator: true,
+      reuseWhitespace: true,
+      sourceMapName: true,
+      tabWidth: true
+    });
+    assert.deepEqual(utils.getRecastConfig(options), expected);
+  });
+})
 
 /******************************************
  * Test Helpers...
