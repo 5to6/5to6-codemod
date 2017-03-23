@@ -18,16 +18,16 @@ var cjsTransform = require('../../transforms/cjs');
  *
  */
 describe('CJS transform', function() {
-  it('require("x")', helper.bind(this, 'cjs-standalone'))
-  it('var ... = require("x")', helper.bind(this, 'cjs-declaration'))
-  it('var ... = require("y").x', helper.bind(this, 'cjs-object'))
-  it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'cjs-mapper'))
-  it('should ignore requires deepr than top-level', helper.bind(this, 'cjs-ignore'))
+  it('require("x")', helper.bind(this, 'standalone'))
+  it('var ... = require("x")', helper.bind(this, 'declaration'))
+  it('var ... = require("y").x', helper.bind(this, 'object'))
+  it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'mapper'))
+  it('should ignore requires deepr than top-level', helper.bind(this, 'ignore'))
 });
 
 function helper (name) {
-  var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/' + name + '.before.js')).toString();
-  var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/' + name + '.after.js')).toString();
+  var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs/' + name + '.before.js')).toString();
+  var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs/' + name + '.after.js')).toString();
   var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
-  assert.equal(result.trim(), expectedSrc.trim());
+  assert.equal(result, expectedSrc);
 }
