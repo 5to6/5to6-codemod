@@ -106,7 +106,7 @@ function replaceCalledDeclarator(j, variableDeclarator) {
 	}
 	var calledArgs = variableDeclarator.value.init.arguments;
 	var importSource = variableDeclarator.value.init.callee.arguments[0].value;
-	var newImport = createImport(j, factoryName, importSource);
+	var newImport = util.createImportStatement(importSource, factoryName);
 	var newDeclaration = createCalledDeclaration(j, id, factoryName, calledArgs)
 	variableDeclarator.parent.insertBefore(newImport, newDeclaration);
 
@@ -121,13 +121,6 @@ function replaceCalledDeclarator(j, variableDeclarator) {
 		}
 		j(variableDeclarator).remove();
 	}
-}
-
-function createImport(j, name, source) {
-	return j.importDeclaration(
-		[j.importDefaultSpecifier(j.identifier(name))],
-		j.literal(source)
-	);
 }
 
 function createCalledDeclaration(j, id, callee, args) {
