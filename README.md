@@ -45,8 +45,6 @@ Our transforms will automatically distinguish and pass through Recast config key
 
 ## Known issues
 
-* Currently loses comments if directly before the `require()` statement.
-* `require()` calls in single var statements get reordered, and moved before the single var after conversion to import.
 * Can't automagically figure out when you want to use `import * as varName`.
 * End-of-line comments also missing in many situations
 * `simple-arrow` loses comments in the function expression body
