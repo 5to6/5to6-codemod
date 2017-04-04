@@ -58,8 +58,9 @@ var util = {
 
     // multiple variable names indicates a destructured import
     if (Array.isArray(variableName)) {
-      var variableIds = variableName.map(function(v) {
-        return j.importSpecifier(j.identifier(v), j.identifier(v));
+      var variableIds = variableName.map(function(v, i) {
+        var prop = Array.isArray(propName) && propName[i] ? propName[i] : v
+        return j.importSpecifier(j.identifier(v), j.identifier(prop));
       });
 
       declaration = j.importDeclaration(variableIds, j.literal(moduleName));
@@ -136,9 +137,11 @@ var util = {
       // var { includes, pick } = require('lodash');
       } else if (declarator.id.type === 'ObjectPattern') {
         var modules = [];
+        propName = [];
 
         declarator.id.properties.forEach(function(p) {
           modules.push(p.key.name);
+          propName.push(p.value.name);
         });
 
         variableName = modules;
