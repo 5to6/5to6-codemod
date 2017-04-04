@@ -6,3 +6,8 @@ exports.thunks = function thunks() {};
 exports.thunks2 = function() {};
 
 module.exports.horse = "morse";
+
+function foo () {
+
+}
+module.exports.foo = foo

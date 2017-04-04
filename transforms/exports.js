@@ -23,9 +23,14 @@ module.exports = function(file, api, options) {
 	 * Move `module.exports.thing` to `export const thing`
 	 */
 	function exportsToExport(p) {
-		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-		var declaration = j.variableDeclaration('const', [declator]);
-		var exportDecl = j.exportDeclaration(false, declaration);
+		var exportDecl
+		if (p.value.left.property.name === p.value.right.name) {
+			exportDecl = j.exportDeclaration(false, null, [j.exportSpecifier(p.value.right, p.value.right)])
+		} else {
+			var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
+			var declaration = j.variableDeclaration('const', [declator]);
+			exportDecl = j.exportDeclaration(false, declaration);
+		}
 		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
