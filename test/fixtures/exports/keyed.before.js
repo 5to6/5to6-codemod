@@ -11,5 +11,6 @@ function foo () {}
 module.exports.foo = foo;
 function bar () {}
 module.exports.bar = bar;
+exports.world = world
 function world () {}
 module.exports.hello = world;

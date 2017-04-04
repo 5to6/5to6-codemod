@@ -9,6 +9,6 @@ export const horse = "morse";
 
 function foo () {}
 function bar () {}
-export { foo, bar };
+export { foo, bar, world };
 function world () {}
 export const hello = world;

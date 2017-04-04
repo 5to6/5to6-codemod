@@ -24,15 +24,23 @@ module.exports = function(file, api, options) {
 	 * ```
 	 * module.exports.foo = foo
 	 * module.exports.bar = bar
+	 * exports.baz = baz
 	 * to
-	 * export { foo, bar }
+	 * export { foo, bar, baz }
 	 * ```
 	 */
 	function MultiExportsToExport (paths) {
 		var specifiers = []
 		var filteredPaths = paths.filter(function (p) {
-			return p.parentPath.parentPath.name === 'body'
-				&& p.value.left.property.name === p.value.right.name;
+			if (p.parentPath.parentPath.name !== 'body') return false
+
+			var isModuleExport = p.get('left', 'object', 'object', 'name').value === 'module'
+				&& p.get('left', 'object', 'property', 'name').value === 'exports'
+			var isExport = p.get('left', 'object', 'name').value === 'exports'
+
+			if (!isModuleExport && !isExport) return false
+
+			return p.value.left.property.name === p.value.right.name;
 		})
 		filteredPaths.forEach(function (p, i) {
 			// aggregate all specifiers
@@ -83,17 +91,11 @@ module.exports = function(file, api, options) {
 	}
 
 	// find module.exports.thing = thing...
+	// find exports.thing = thing...
 	MultiExportsToExport(root.find(j.AssignmentExpression, {
 		operator: '=',
 		left: {
-			type: 'MemberExpression',
-			object: {
-				type: 'MemberExpression',
-				object: {
-					name: 'module'
-				},
-				property: { name: 'exports' }
-			}
+			type: 'MemberExpression'
 		},
 		right: {
 			type: 'Identifier'
