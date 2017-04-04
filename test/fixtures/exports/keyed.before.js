@@ -7,7 +7,9 @@ exports.thunks2 = function() {};
 
 module.exports.horse = "morse";
 
-function foo () {
-
-}
-module.exports.foo = foo
+function foo () {}
+module.exports.foo = foo;
+function bar () {}
+module.exports.bar = bar;
+function world () {}
+module.exports.hello = world;

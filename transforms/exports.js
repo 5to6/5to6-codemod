@@ -20,17 +20,43 @@ module.exports = function(file, api, options) {
 	}
 
 	/**
+	 * Must be run before exportsToExport
+	 * ```
+	 * module.exports.foo = foo
+	 * module.exports.bar = bar
+	 * to
+	 * export { foo, bar }
+	 * ```
+	 */
+	function MultiExportsToExport (paths) {
+		var specifiers = []
+		var filteredPaths = paths.filter(function (p) {
+			return p.parentPath.parentPath.name === 'body'
+				&& p.value.left.property.name === p.value.right.name;
+		})
+		filteredPaths.forEach(function (p, i) {
+			// aggregate all specifiers
+			specifiers.push(j.exportSpecifier(
+				j.identifier(p.value.right.name),
+				j.identifier(p.value.right.name)
+			))
+
+			// replace the last module.exports.*
+			if (i === filteredPaths.length - 1) {
+				j(p.parentPath).replaceWith(j.exportDeclaration(false, null, specifiers))
+			} else {
+				j(p.parentPath).remove()
+			}
+		})
+	}
+
+	/**
 	 * Move `module.exports.thing` to `export const thing`
 	 */
 	function exportsToExport(p) {
-		var exportDecl
-		if (p.value.left.property.name === p.value.right.name) {
-			exportDecl = j.exportDeclaration(false, null, [j.exportSpecifier(p.value.right, p.value.right)])
-		} else {
-			var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
-			var declaration = j.variableDeclaration('const', [declator]);
-			exportDecl = j.exportDeclaration(false, declaration);
-		}
+		var declator = j.variableDeclarator(j.identifier(p.value.left.property.name), p.value.right);
+		var declaration = j.variableDeclaration('const', [declator]);
+		var exportDecl = j.exportDeclaration(false, declaration);
 		// console.log('[module.]exports.thing', util.toString(p), util.toString(exportDecl));
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
@@ -55,6 +81,24 @@ module.exports = function(file, api, options) {
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
+
+	// find module.exports.thing = thing...
+	MultiExportsToExport(root.find(j.AssignmentExpression, {
+		operator: '=',
+		left: {
+			type: 'MemberExpression',
+			object: {
+				type: 'MemberExpression',
+				object: {
+					name: 'module'
+				},
+				property: { name: 'exports' }
+			}
+		},
+		right: {
+			type: 'Identifier'
+		}
+	}))
 
 	// find module.exports.thing = something....
 	root.find(j.AssignmentExpression, {

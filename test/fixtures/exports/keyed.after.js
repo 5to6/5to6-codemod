@@ -7,7 +7,8 @@ export const thunks = function thunks() {};
 export const thunks2 = function() {};
 export const horse = "morse";
 
-function foo () {
-
-}
-export { foo };
+function foo () {}
+function bar () {}
+export { foo, bar };
+function world () {}
+export const hello = world;
