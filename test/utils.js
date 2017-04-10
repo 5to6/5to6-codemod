@@ -44,10 +44,18 @@ describe('util.getPropsFromRequire(ast)', function(){
   });
 
 
-  it('var { includes, pick } = require(\'lodash\') -> {variableName = [\'includes\', \'pick\'], moduleName: \'lodash\'}', function() {
+  it('var { includes, pick } = require(\'lodash\') -> {variableName: [\'includes\', \'pick\'], moduleName: \'lodash\' propName: [\'includes\', \'pick\']}', function() {
     var ast = toAST('var { includes, pick } = require(\'lodash\');')[0]; // returns an array of statements
     var result = utils.getPropsFromRequire(ast);
-    var expected = { variableName: ['includes', 'pick'], moduleName: 'lodash' };
+    var expected = { variableName: ['includes', 'pick'], moduleName: 'lodash', propName: ['includes', 'pick'] };
+
+    assert.deepEqual(result, expected);
+  });
+
+  it('var { includes: foo } = require(\'lodash\') -> {variableName: [\'includes\'], moduleName: \'lodash\', propName: [\'foo\']}', function() {
+    var ast = toAST('var { includes: foo } = require(\'lodash\');')[0]; // returns an array of statements
+    var result = utils.getPropsFromRequire(ast);
+    var expected = { variableName: ['includes'], moduleName: 'lodash', propName: ['foo'] };
 
     assert.deepEqual(result, expected);
   });
@@ -92,6 +100,20 @@ describe('util.createImportStatement(moduleName [, variableName])', function(){
 
   it('-> `import {includes, omit} from \'lodash\'` when passed 2 params (second one being an array of strings)', function() {
     var result = toString(utils.createImportStatement('lodash', ['includes', 'omit']));
+    var expected = 'import { includes, omit } from \'lodash\';';
+
+    assert.deepEqual(result, expected);
+  });
+
+  it('-> `import {includes as foo, omit as bar} from \'lodash\'` when passed 2 array params', function() {
+    var result = toString(utils.createImportStatement('lodash', ['includes', 'omit'], ['foo', 'bar']));
+    var expected = 'import { includes as foo, omit as bar } from \'lodash\';';
+
+    assert.deepEqual(result, expected);
+  });
+
+  it('-> `import {includes, omit} from \'lodash\'` when passed 2 array params with the same values', function() {
+    var result = toString(utils.createImportStatement('lodash', ['includes', 'omit'], ['includes', 'omit']));
     var expected = 'import { includes, omit } from \'lodash\';';
 
     assert.deepEqual(result, expected);

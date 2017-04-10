@@ -20,6 +20,45 @@ module.exports = function(file, api, options) {
 	}
 
 	/**
+	 * Must be run before exportsToExport
+	 * ```
+	 * module.exports.foo = foo
+	 * module.exports.bar = bar
+	 * exports.baz = baz
+	 * to
+	 * export { foo, bar, baz }
+	 * ```
+	 */
+	function MultiExportsToExport (paths) {
+		var specifiers = []
+		var filteredPaths = paths.filter(function (p) {
+			if (p.parentPath.parentPath.name !== 'body') return false
+
+			var isModuleExport = p.get('left', 'object', 'object', 'name').value === 'module'
+				&& p.get('left', 'object', 'property', 'name').value === 'exports'
+			var isExport = p.get('left', 'object', 'name').value === 'exports'
+
+			if (!isModuleExport && !isExport) return false
+
+			return p.value.left.property.name === p.value.right.name;
+		})
+		filteredPaths.forEach(function (p, i) {
+			// aggregate all specifiers
+			specifiers.push(j.exportSpecifier(
+				j.identifier(p.value.right.name),
+				j.identifier(p.value.right.name)
+			))
+
+			// replace the last module.exports.*
+			if (i === filteredPaths.length - 1) {
+				j(p.parentPath).replaceWith(j.exportDeclaration(false, null, specifiers))
+			} else {
+				j(p.parentPath).remove()
+			}
+		})
+	}
+
+	/**
 	 * Move `module.exports.thing` to `export const thing`
 	 */
 	function exportsToExport(p) {
@@ -50,6 +89,18 @@ module.exports = function(file, api, options) {
 		exportDecl.comments = p.parentPath.value.comments;
 		j(p.parentPath).replaceWith(exportDecl);
 	}
+
+	// find module.exports.thing = thing...
+	// find exports.thing = thing...
+	MultiExportsToExport(root.find(j.AssignmentExpression, {
+		operator: '=',
+		left: {
+			type: 'MemberExpression'
+		},
+		right: {
+			type: 'Identifier'
+		}
+	}))
 
 	// find module.exports.thing = something....
 	root.find(j.AssignmentExpression, {
