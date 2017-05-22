@@ -30,6 +30,14 @@ describe('Named exports generation transform', function() {
     'should generate named exports for an exported object expression',
     helper.bind(this, 'expression')
   );
+	it(
+    'should generate named exports if object keys are references',
+    helper.bind(this, 'references')
+  );
+	it(
+    'should ignore computed property keys for an exported object expression',
+    helper.bind(this, 'ignore')
+  );
 })
 
 function helper(name) {
