@@ -36,6 +36,10 @@ describe('Exports transform', function() {
     'should convert module.exports = (...) -> export default (...)',
     helper.bind(this, 'default')
   );
+  it(
+    'should convert module.exports.thing -> export const thing',
+    helper.bind(this, 'keyed')
+  );
 });
 
 function helper(name) {
