@@ -37,6 +37,8 @@ Our transforms will automatically distinguish and pass through Recast config key
 
 - `amd` - Transforms AMD style modules to ES6 `import`/`export`
 - `cjs` - Transforms CommonJS style `require()` calls to ES6 `import` statements
+	- This transformation accepts the following option flags:
+		- `hoist`: Enables hoisting require statements to the top
 - `no-strict` - Removes "use strict" statements
 - `exports` - Move CommonJS style `module.exports` statements to ES6 `export` statements
 - `named-export-generation` - Adds named exports corresponding to default export object keys. Only valid for ES6 modules exporting an object as the default export.

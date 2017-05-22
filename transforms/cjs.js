@@ -2,33 +2,76 @@
  * cjs - Replace require() calls with es6 imports statements
  */
 
- var sortBy = require('lodash/sortBy');
+var sortBy = require('lodash/sortBy');
 var util = require('../utils/main');
 
 module.exports = function transformer(file, api, options) {
 	var j = api.jscodeshift;
 	var root = j(file.source);
+	var config = util.getTransformConfig(options);
+
+	//
+	// Handle import hoisting
+	//
+	if (config.hoist === true) {
+		var lastImportIndex = findLastImportIndex(j, root);
+		var lastImport = lastImportIndex >= 0 ? root.find(j.Program).get('body', lastImportIndex) : undefined
+
+		// Hoist require('a');
+			getImportExpressionStatements(j, root).filter(function(expressionStatement) {
+				return !isParentRoot(expressionStatement);
+			}).forEach(function(expressionStatement) {
+				var newExpression = j.expressionStatement(expressionStatement.value.expression)
+				if (lastImport === undefined) {
+					lastImportIndex = 0;
+					j(root.find(j.Program).get('body', 0)).insertBefore(newExpression);
+				} else {
+					lastImportIndex += 1;
+					j(lastImport).insertAfter(newExpression);
+				}
+				j(expressionStatement).remove();
+
+				lastImport = root.find(j.Program).get('body', lastImportIndex);
+			});
+
+		// Hoist var ... = require(...);
+		getImportDeclaratorPaths(j, root).filter(function(variableDeclarator) {
+			var variableDeclaration = variableDeclarator.parent;
+			return !isParentRoot(variableDeclaration);
+		}).forEach(function(declarator) {
+			var newDeclaration = j.variableDeclaration('const', [declarator.value]);
+			if (lastImport === undefined) {
+				lastImportIndex = 0;
+				j(root.find(j.Program).get('body', 0)).insertBefore(newDeclaration);
+			} else {
+				j(lastImport).insertAfter(newDeclaration);
+				lastImportIndex += 1;
+			}
+			lastImport = root.find(j.Program).get('body', lastImportIndex);
+			j(declarator).remove();
+		});
+	}
+
+	//
+	// Convert require -> import
+	//
 
 	// require('a')
-	root.find(j.ExpressionStatement, { expression: { callee: { name: 'require' }}})
-		.forEach(function (expressionStatement) {
-			if (!isParentRoot(expressionStatement)) return
-			j(expressionStatement).replaceWith(convertRequire(expressionStatement, expressionStatement.node.comments));
-		});
+	getImportExpressionStatements(j, root).filter(function (expressionStatement) {
+		return isParentRoot(expressionStatement);
+	}).forEach(function (expressionStatement) {
+		j(expressionStatement).replaceWith(convertRequire(expressionStatement, expressionStatement.node.comments));
+	});
 
+	// var ... = require('y')
+	// var ... = require('y').x
+	// var x = require("y")( ... )
 	root.find(j.VariableDeclaration).forEach(function(variableDeclaration) {
-		// var ... = require('y')
-		var defaultImports = j(variableDeclaration).find(j.VariableDeclarator, { init: { callee: { name: 'require' }}});
-
-		// var ... = require('y').x
-		var namedImports = j(variableDeclaration).find(j.VariableDeclarator, { init: { object: { callee: { name: 'require' }}}});
-
-		var sortedImports = sortBy(
-			defaultImports.paths().concat(namedImports.paths()),
-			['value.loc.start.line', 'value.loc.start.column']
-		);
-		sortedImports.forEach(replaceDeclarator.bind(undefined, j))
-  });
+		getImportDeclaratorPaths(j, j(variableDeclaration)).filter(function(variableDeclarator) {
+			var variableDeclaration = variableDeclarator.parent;
+			return isParentRoot(variableDeclaration);
+		}).forEach(replaceDeclarator.bind(undefined, j));
+	});
 
 	// var x = { x: require('...'), y: require('...'), ... }
 	root.find(j.VariableDeclaration, { declarations: [{ init: { type: 'ObjectExpression' }}] })
@@ -53,29 +96,100 @@ module.exports = function transformer(file, api, options) {
 				});
 		});
 
-	// var x = require("y")( ... )
-	root.find(j.VariableDeclarator, {
-    init: {
-      type: 'CallExpression',
-      callee: {
-        callee: {
-          name: 'require'
-        }
-      }
-    }
-  }).filter(function(vdRef) {
-    var callExpression = vdRef.value.init;
-    return 'arguments' in callExpression && Array.isArray(callExpression.arguments);
-  }).forEach(replaceCalledDeclarator.bind(undefined, j));
-
 	return root.toSource(util.getRecastConfig(options));
 }
 
 function isParentRoot(path) {
-  return path.parent.node.type === 'Program';
+	return path.parent.node.type === 'Program';
 }
 
-function convertRequire (ast, comments) {
+function getImportExpressionStatements(j, rootAst) {
+	// require('a')
+	return rootAst.find(j.ExpressionStatement, {
+		expression: {
+			callee: {
+				name: 'require'
+			}
+		}
+	});
+}
+
+function getDefaultImportDeclarators(j, rootAst) {
+	// var ... = require('y')
+	return rootAst.find(j.VariableDeclarator, {
+		init: {
+			callee: {
+				name: 'require'
+			},
+			arguments: [
+				{
+					type: 'Literal'
+				}
+			]
+		}
+	}).filter(function(variableDeclarator) {
+		return variableDeclarator.value
+	});
+}
+
+function getNamedImportDeclarators(j, rootAst) {
+	// var ... = require('y').x
+	return rootAst.find(j.VariableDeclarator, {
+		init: {
+			object: {
+				callee: {
+					name: 'require'
+				},
+				arguments: [
+					{
+						type: 'Literal'
+					}
+				]
+			}
+		}
+	});
+}
+
+function getCalledImportDeclarators(j, rootAst) {
+	// var x = require("y")( ... )
+	return rootAst.find(j.VariableDeclarator, {
+		init: {
+			type: 'CallExpression',
+			callee: {
+				callee: {
+					name: 'require'
+				},
+				arguments: [
+					{
+						type: 'Literal'
+					}
+				]
+			}
+		}
+	}).filter(function(vdRef) {
+		var callExpression = vdRef.value.init;
+		return 'arguments' in callExpression && Array.isArray(callExpression.arguments);
+	});
+}
+
+function getImportDeclaratorPaths(j, variableDeclaration) {
+	// var ... = require('y')
+	var defaultImports = getDefaultImportDeclarators(j, variableDeclaration)
+
+	// var ... = require('y').x
+	var namedImports = getNamedImportDeclarators(j, variableDeclaration);
+
+	// var x = require("y")( ... )
+	var calledImports = getCalledImportDeclarators(j, variableDeclaration);
+
+	var sortedImports = sortBy(
+		defaultImports.paths().concat(namedImports.paths()).concat(calledImports.paths()),
+		['value.loc.start.line', 'value.loc.start.column']
+	);
+	return sortedImports;
+}
+
+function convertRequire(ast, comments) {
 	var props = util.getPropsFromRequire(ast);
 	return util.createImportStatement(
 		props.moduleName,
@@ -85,10 +199,30 @@ function convertRequire (ast, comments) {
 	);
 }
 
+function createRequire(j, ast, comments) {
+	if (
+		'declarations' in ast &&
+		Array.isArray(ast.declarations) &&
+		'init' in ast.declarations[0] &&
+		'callee' in ast.declarations[0].init &&
+		ast.declarations[0].init.callee.type === 'CallExpression' &&
+		'arguments' in ast.declarations[0].init &&
+		Array.isArray(ast.declarations[0].init.arguments)
+	) {
+		return [
+			createIntermediateImport(j, ast.declarations[0], comments),
+			createDeclaredCallExpression(j, ast.declarations[0], comments)
+		]
+	} else {
+		return [
+			convertRequire(ast, comments)
+		];
+	}
+}
+
 function replaceDeclarator (j, variableDeclarator, index) {
 	var variableDeclaration = variableDeclarator.parent
 	var variableDeclarationComments = Array.isArray(variableDeclaration.node.comments) ? variableDeclaration.node.comments : []
-	if (!isParentRoot(variableDeclaration)) return
 
 	// create unique variableDeclaration for each declarator (for more consistent prop extraction)
 	var varStatement = j.variableDeclaration('var', [variableDeclarator.node]);
@@ -97,50 +231,76 @@ function replaceDeclarator (j, variableDeclarator, index) {
 	var comments = variableDeclarationComments.filter(function(comment){
 		return (isFirstDeclarator && comment.leading) || (isLastDeclarator && comment.trailing);
 	})
+	if (Array.isArray(variableDeclarator.value.comments)) {
+		comments = comments.concat(variableDeclarator.value.comments);
+	}
 
 	if (isLastDeclarator) {
-		j(variableDeclaration).replaceWith(convertRequire(varStatement, comments));
+		j(variableDeclaration).replaceWith(createRequire(j, varStatement, comments));
 	} else {
 		// HACK: Using before for now, to avoid it mangling the whitespace after the var statement.
 		// This will cause problems if the single var statement contains deps that the other els depend on
-		j(variableDeclaration).insertBefore(convertRequire(varStatement, comments));
+		j(variableDeclaration).insertBefore(createRequire(j, varStatement, comments));
 		j(variableDeclarator).remove();
 	}
 }
 
-function replaceCalledDeclarator(j, variableDeclarator) {
-	var id = variableDeclarator.value.id
+function createIntermediateImport(j, variableDeclarator, comments) {
+	comments = Array.isArray(comments) ? comments : []
+	var id = variableDeclarator.id
 	var factoryName;
 	if (id.type === 'Identifier') {
 		factoryName = id.name + 'Factory';
 	} else if (id.type === 'ObjectPattern') {
 		factoryName = id.properties.map(function(property){ return property.key.name }).join('') + 'Factory';
 	}
-	var calledArgs = variableDeclarator.value.init.arguments;
-	var importSource = variableDeclarator.value.init.callee.arguments[0].value;
+	var importSource = variableDeclarator.init.callee.arguments[0].value;
 	var newImport = util.createImportStatement(importSource, factoryName);
-	var newDeclaration = createCalledDeclaration(j, id, factoryName, calledArgs)
-	variableDeclarator.parent.insertBefore(newImport, newDeclaration);
 
-	if (variableDeclarator.parent.value.declarations.length === 1) {
-		if ('comments' in variableDeclarator.parent.value) {
-			newImport.comments = variableDeclarator.parent.value.comments;
-		}
-		j(variableDeclarator.parent).remove();
-	} else {
-		if ('comments' in variableDeclarator.value) {
-			newImport.comments = variableDeclarator.value.comments;
-		}
-		j(variableDeclarator).remove();
+	var leadingComments = comments.filter(function(c) { return c.leading })
+	if (leadingComments.length) {
+		newImport.comments = leadingComments;
 	}
+
+	return newImport
 }
 
-function createCalledDeclaration(j, id, callee, args) {
-	return j.variableDeclaration('const', [j.variableDeclarator(
-		id,
-		j.callExpression(
-			j.identifier(callee),
-			args
-		)
-	)]);
+function createDeclaredCallExpression(j, variableDeclarator, comments) {
+	comments = Array.isArray(comments) ? comments : []
+	var id = variableDeclarator.id
+	var factoryName;
+	if (id.type === 'Identifier') {
+		factoryName = id.name + 'Factory';
+	} else if (id.type === 'ObjectPattern') {
+		factoryName = id.properties.map(function(property){ return property.key.name }).join('') + 'Factory';
+	}
+	var calledArgs = variableDeclarator.init.arguments;
+	var newDeclaration = j.variableDeclaration('const', [
+		j.variableDeclarator(id, j.callExpression(j.identifier(factoryName), calledArgs))
+	])
+	var trailingComments = comments.filter(function(c) { return c.trailing })
+	if (trailingComments.length) {
+		newDeclaration.comments = trailingComments;
+	}
+	return newDeclaration
+}
+
+function findLastImportIndex(j, root) {
+	var bodyNodes = root.find(j.Program).get('body').value;
+	var imports = bodyNodes.filter(function(node) {
+		if (node.type === 'ImportDeclaration') {
+			return true;
+		} else if (node.type === 'VariableDeclaration') {
+			return getImportDeclaratorPaths(j, j(node)).filter(function(declarator) {
+				return (
+					util.hasParentOfType(declarator, 'BlockStatement') === false &&
+					util.hasParentOfType(declarator, 'FunctionDeclaration') === false
+				)
+			}).length > 0;
+		} else {
+			return false;
+		}
+	})
+	var lastImport = imports[imports.length - 1];
+	return bodyNodes.indexOf(lastImport);
 }
