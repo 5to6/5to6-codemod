@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/5to6/5to6-codemod.svg)](https://travis-ci.org/5to6/5to6-codemod)
+[![GitHub version](https://img.shields.io/github/tag/5to6/5to6-codemod.svg)](https://github.com/5to6/5to6-codemod)
+[![NPM version](https://img.shields.io/npm/v/5to6-codemod.svg)](https://www.npmjs.com/package/5to6-codemod)
+[![Downloads](https://img.shields.io/npm/dm/5to6-codemod.svg)](https://www.npmjs.com/package/5to6-codemod)
+
 # 5to6-codemod
 
 A collection of [codemods](https://medium.com/@cpojer/effective-javascript-codemods-5a6686bb46fb) that allow you to transform your JavaScript code from ES5 to ES6 using [jscodeshift](https://github.com/facebook/jscodeshift).
