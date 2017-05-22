@@ -20,7 +20,6 @@ module.exports = function(file, api, options) {
 		// Find default exported object expression
 		// ex. export default { ... };
 		if (exportRef.value.declaration.type === 'ObjectExpression') {
-			// TODO: Write function to generate exported declarator name
 			defaultExportName = generateDefaultExportName()
 			var replacementExport = j.exportDefaultDeclaration(j.identifier(defaultExportName));
 			var replacementDeclaration = j.variableDeclaration('const', [
@@ -89,82 +88,130 @@ module.exports = function(file, api, options) {
 			}
 		}).forEach(function(esRef) {
 			var name = esRef.value.expression.left.property.name
-			var prop = j.property('init', j.identifier(name), j.identifier(name));
-			prop.shorthand = true;
+			var prop = j.property('init', j.identifier(name), esRef.value.expression.right);
 			mutatedProps[name] = prop;
 		});
 		if (Object.keys(mutatedProps).length > 0) {
 			var newObjectExpression = j.objectExpression(
 				Object.keys(mutatedProps).map(function(key) {
-					return mutatedProps[key]
+					return mutatedProps[key];
 				})
 			)
-			objectExpressions.push(newObjectExpression)
+			objectExpressions.push(newObjectExpression);
 		}
 
+		var referenceProps = [];
+		var literalProps = [];
 		// Convert object expressions into named export declarations and insert into tree
 		objectExpressions.filter(function(objectExpression) {
 			return 'properties' in objectExpression && objectExpression.properties.length > 0;
-		}).map(function(objectExpression) {
-			return generateNamedExportDeclaration(exportRef, defaultExportName, objectExpression);
-		}).forEach(function(exportNamedDeclaration) {
-			exportRef.insertAfter(exportNamedDeclaration);
+		}).forEach(function(objectExpression) {
+			referenceProps = objectExpression.properties.filter(function(prop) {
+				return (
+					'key' in prop && prop.key.type === 'Identifier' &&
+					'value' in prop && prop.value.type === 'Identifier'
+				);
+			});
+
+			literalProps = objectExpression.properties.filter(function(prop) {
+				return (
+					'key' in prop && prop.key.type === 'Identifier' &&
+					'value' in prop && prop.value.type !== 'Identifier'
+				);
+			});
 		});
+
+		var declaredNamedExportDeclaration = createDeclaredNamedExportDeclaration(exportRef, defaultExportName, literalProps);
+		if (declaredNamedExportDeclaration !== null) {
+			exportRef.insertAfter(declaredNamedExportDeclaration);
+		}
+
+		var specifiedNamedExportDeclaration = createSpecificedNamedExportDeclaration(exportRef, defaultExportName, referenceProps);
+		if (specifiedNamedExportDeclaration !== null) {
+			exportRef.insertAfter(specifiedNamedExportDeclaration);
+		}
 	}
 
-  function generateDefaultExportName() {
-    var prefix = 'exported';
-    var index = 2;
-    var name = prefix;
-    while (root.find(j.Identifier, { name: name }).length > 0) {
-      name = prefix + index;
-      index++;
-    }
-    return name;
-  }
+	function generateDefaultExportName() {
+		var prefix = 'exported';
+		var index = 2;
+		var name = prefix;
+		while (root.find(j.Identifier, { name: name }).length > 0) {
+			name = prefix + index;
+			index++;
+		}
+		return name;
+	}
 
-  function generateNamedExportDeclaration(exportRef, defaultExportName, objectExpression) {
-    const exportNames = objectExpression.properties.map(function(prop) {
-      return prop.key.name
-    });
-    const properties = exportNames.filter(function(name) {
-      return shouldCreateNamedExport(defaultExportName, name)
-    }).map(function(name) {
-      const prop = j.property('init', j.identifier(name), j.identifier(name));
-      prop.shorthand = true;
-      return prop;
-    });
-    const exportNamedDeclaration = j.exportNamedDeclaration(
-      j.variableDeclaration('const',[
-        j.variableDeclarator(
-          j.objectPattern(properties),
-          exportRef.value.declaration
-        )
-      ])
-    );
-    return exportNamedDeclaration;
-  }
+	function createDeclaredNamedExportDeclaration(exportRef, defaultExportName, props) {
+		if (props.length === 0) {
+			return null;
+		}
 
-  function shouldCreateNamedExport(defaultExportName, exportName) {
-    const isAlreadyExportedInDeclaration = root.find(j.Property, {
-      value: {
-        name: exportName
-      }
-    }).filter(function(r) {
-      return util.hasParentOfType(r, 'ExportNamedDeclaration');
-    }).length > 0;
-    const isAlreadyExported = root.find(j.VariableDeclarator, {
-      id: { name: exportName },
-      init: {
-        object: { name: defaultExportName },
-        property: { name: exportName }
-      }
-    }).filter(function (r) {
-      return util.hasParentOfType(r, 'ExportNamedDeclaration');
-    }).length > 0;
-    const shouldCreateExport = !(isAlreadyExported || isAlreadyExportedInDeclaration);
-    return shouldCreateExport;
-  }
+		var exportNames = props.map(function(prop) {
+			return prop.key.name;
+		});
+
+		var properties = exportNames.filter(function(name) {
+			return shouldCreateNamedExport(defaultExportName, name)
+		}).map(function(name) {
+			var prop = j.property('init', j.identifier(name), j.identifier(name));
+			prop.shorthand = true;
+			return prop;
+		});
+		var exportNamedDeclaration = j.exportNamedDeclaration(
+			j.variableDeclaration('const', [
+				j.variableDeclarator(
+					j.objectPattern(properties),
+					exportRef.value.declaration
+				)
+			])
+		);
+		return exportNamedDeclaration;
+	}
+
+	function createSpecificedNamedExportDeclaration(exportRef, defaultExportName, props) {
+		if (props.length === 0) {
+			return null;
+		}
+
+		var specifiers = props.filter(function(prop) {
+			return shouldCreateNamedExport(defaultExportName, prop.key.name)
+		}).map(function(prop) {
+			return j.exportSpecifier(j.identifier(prop.value.name), j.identifier(prop.key.name));
+		});
+		var exportNamedDeclaration = j.exportNamedDeclaration(null, specifiers);
+		return exportNamedDeclaration;
+	}
+
+	function shouldCreateNamedExport(defaultExportName, exportName) {
+		var isAlreadyExportedInDeclaration = root.find(j.Property, {
+			value: {
+				name: exportName
+			}
+		}).filter(function(r) {
+			return util.hasParentOfType(r, 'ExportNamedDeclaration');
+		}).length > 0;
+
+		var isAlreadyExported = root.find(j.VariableDeclarator, {
+			id: { name: exportName },
+			init: {
+				object: { name: defaultExportName },
+				property: { name: exportName }
+			}
+		}).filter(function (r) {
+			return util.hasParentOfType(r, 'ExportNamedDeclaration');
+		}).length > 0;
+
+		var isAlreadyExportedAsSpecifier = root.find(j.ExportSpecifier, {
+			exported: {
+				name: exportName
+			}
+		}).length > 0;
+
+		var shouldCreateExport = !(isAlreadyExported || isAlreadyExportedInDeclaration || isAlreadyExportedAsSpecifier);
+		return shouldCreateExport;
+	}
 
 	root.find(j.ExportDefaultDeclaration).forEach(addNamedExports);
 
