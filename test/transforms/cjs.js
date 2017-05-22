@@ -24,6 +24,7 @@ describe('CJS transform', function() {
   it('var ... = require("y")( ... )', helper.bind(this, 'called'))
   it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'mapper'))
   it('should ignore requires deepr than top-level', helper.bind(this, 'ignore'))
+  it('should preserve comments before and after require\'s', helper.bind(this, 'comments'))
 });
 
 function helper (name) {
