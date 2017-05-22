@@ -236,6 +236,22 @@ var util = {
     return util.getConfig(options, util.getDefaultRecastConfig(), function(key) {
       return util.isRecastArg(key);
     })
+  },
+
+  findParentOfType: function(node, type) {
+      // traverse up the tree until end, or you find a matching type
+      while (node.parentPath) {
+          node = node.parentPath;
+          if (node.value.type === type) {
+              return node;
+          }
+      }
+
+      return false;
+  },
+
+  hasParentOfType: function(node, type) {
+    return util.findParentOfType(node, type) !== false;
   }
 };
 

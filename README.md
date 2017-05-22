@@ -39,6 +39,7 @@ Our transforms will automatically distinguish and pass through Recast config key
 - `cjs` - Transforms CommonJS style `require()` calls to ES6 `import` statements
 - `no-strict` - Removes "use strict" statements
 - `exports` - Move CommonJS style `module.exports` statements to ES6 `export` statements
+- `named-export-generation` - Adds named exports corresponding to default export object keys. Only valid for ES6 modules exporting an object as the default export.
 - `let` - Replace all `var` calls to use `let`
 - `simple-arrow` - Replace all function expressions with a body of a sole return statement into arrow functions
 
