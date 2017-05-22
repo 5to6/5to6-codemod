@@ -1,6 +1,6 @@
 {
   "name": "5to6-codemod",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "A collection of codemods that allow you to transform your js code from ES5 to ES6.",
   "main": "test.js",
   "scripts": {
