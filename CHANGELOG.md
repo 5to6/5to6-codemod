@@ -1,3 +1,10 @@
+
+### 1.6.0
+- added `named-export-generation` transform
+- improved comment handling
+- added support for `require('x')()`
+- various other fixes
+
 ### 1.5.0
 - Exported functions not const instead of let
 
