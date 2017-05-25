@@ -17,3 +17,8 @@ var Fetcher = require( 'components/list-fetcher' ),
 	actions = require( 'actions' ),
 	Placeholder = require( './placeholder' ),
 	mapStatus = require( 'lib/route' ).mapPostStatus;
+/**
+ * Random dependencies
+ */
+const someLib = require( 'lib/main' );
+const otherLib = require( 'lib/other' );

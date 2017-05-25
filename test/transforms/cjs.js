@@ -25,6 +25,7 @@ describe('CJS transform', function() {
   it('var x = { x: require("x"), y: require("y"), ... }', helper.bind(this, 'mapper'))
   it('should ignore requires deepr than top-level', helper.bind(this, 'ignore'))
   it('should preserve comments before and after require\'s', helper.bind(this, 'comments'))
+  it('should hoist require declarations and expressions when "hoist" flag is enabled', helperWithOptions({ hoist: true }).bind(this, 'hoist'))
 });
 
 function helper (name) {
@@ -32,4 +33,13 @@ function helper (name) {
   var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs/' + name + '.after.js')).toString();
   var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift });
   assert.equal(result, expectedSrc);
+}
+
+function helperWithOptions(options) {
+  return function (name) {
+    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs/' + name + '.before.js')).toString();
+    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/cjs/' + name + '.after.js')).toString();
+    var result = cjsTransform({ source: src }, { jscodeshift: jscodeshift }, options);
+    assert.equal(result, expectedSrc);
+  }
 }
