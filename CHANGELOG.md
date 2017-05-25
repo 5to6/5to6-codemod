@@ -1,9 +1,10 @@
 
 ### 1.6.0
-- added `named-export-generation` transform
-- improved comment handling
-- added support for `require('x')()`
-- various other fixes
+
+- Added `named-export-generation` transform
+- Improved comment handling for CJS transform
+- Added support for handling `require('x')()`
+- Bugfixes
 
 ### 1.5.0
 - Exported functions not const instead of let
@@ -12,7 +13,7 @@
 - Restrict import conversion to top-level require
 
 ### 1.3.0
-- Avoid comment duplication 
+- Avoid comment duplication
 
 ### 1.2.0
 
