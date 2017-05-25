@@ -1,3 +1,5 @@
+### 1.7.0
+- Added CommonJS import hoisting to CJS transform
 
 ### 1.6.0
 
