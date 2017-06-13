@@ -115,7 +115,11 @@ module.exports = function(file, api, options) {
 
 			literalProps = objectExpression.properties.filter(function(prop) {
 				return (
-					'key' in prop && prop.key.type === 'Identifier' &&
+					// Ignore computed property keys
+					!prop.computed &&
+					('key' in prop &&
+						// Object keys can be identifier or string literals
+						(prop.key.type === 'Identifier' || prop.key.type === 'Literal')) &&
 					'value' in prop && prop.value.type !== 'Identifier'
 				);
 			});
@@ -149,7 +153,9 @@ module.exports = function(file, api, options) {
 		}
 
 		var exportNames = props.map(function(prop) {
-			return prop.key.name;
+			return prop.key.type === 'Literal' ?
+				prop.key.value :
+				prop.key.name;
 		});
 
 		var properties = exportNames.filter(function(name) {

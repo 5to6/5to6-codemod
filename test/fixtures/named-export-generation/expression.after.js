@@ -9,9 +9,11 @@ const exported5 = {
         console.warn('user', user);
     },
 
-    c: {
+    'c': {
         sample: 42
-    }
+    },
+
+    "d": 'is for dinosaur'
 };
 
 export default exported5;
@@ -19,5 +21,6 @@ export default exported5;
 export const {
     a,
     b,
-    c
+    c,
+    d
 } = exported5;
