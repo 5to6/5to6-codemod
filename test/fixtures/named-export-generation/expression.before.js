@@ -9,7 +9,9 @@ export default {
         console.warn('user', user);
     },
 
-    c: {
+    'c': {
         sample: 42
-    }
+    },
+
+    "d": 'is for dinosaur'
 };
