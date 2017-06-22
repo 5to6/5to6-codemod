@@ -107,6 +107,7 @@ module.exports = function(file, api, options) {
 		operator: '=',
 		left: {
 			type: 'MemberExpression',
+			computed: false,
 			object: {
 				type: 'MemberExpression',
 				object: {
@@ -157,6 +158,7 @@ module.exports = function(file, api, options) {
 	root.find(j.AssignmentExpression, {
 		operator: '=',
 		left: {
+			computed: false,
 			object: { name: 'exports' }
 		}
 	})
@@ -217,6 +219,7 @@ module.exports = function(file, api, options) {
 		operator: '=',
 		left: {
 			type: 'MemberExpression',
+			computed: false,
 			object: {
 				type: 'MemberExpression',
 				object: {

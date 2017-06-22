@@ -25,6 +25,10 @@ describe('Exports transform', function() {
   it('should convert module.exports = (...) -> export default (...)', helper.bind(this, 'default'));
   it('should convert module.exports.thing -> export const thing', helper.bind(this, 'keyed'));
   it(
+    'should ignore exports = (...) and module.exports[variable] = (...)',
+    helper.bind(this, 'computed')
+  );
+  it(
     'should convert exports.house() -> house()',
     helper.bind(this, 'called')
   );
