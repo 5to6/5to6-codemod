@@ -94,7 +94,7 @@ module.exports = function transformer(file, api, options) {
 					 * time to throw up our hands and let someone manually fix this.
 					 */
 					if (moduleNames[variableName] && moduleNames[variableName] !== moduleName) {
-						console.error(`Could not map: ${moduleName} in file: ${file}, skipping.`)
+						console.error(`Could not map: ${moduleName} in file: ${file.path}, skipping.`)
 						return
 					}
 
