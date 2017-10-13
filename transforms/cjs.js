@@ -73,6 +73,8 @@ module.exports = function transformer(file, api, options) {
 		}).forEach(replaceDeclarator.bind(undefined, j));
 	});
 
+	// Dedupe module names.
+	var moduleNames = {};
 	// var x = { x: require('...'), y: require('...'), ... }
 	root.find(j.VariableDeclaration, { declarations: [{ init: { type: 'ObjectExpression' }}] })
 		.forEach(function (variableDeclaration) {
@@ -83,16 +85,32 @@ module.exports = function transformer(file, api, options) {
 				.find(j.Property, { value: { callee: { name: 'require' }}})
 				.forEach(function (property) {
 					// generate import statement
-					var variableName = property.get('key', 'name').value
 					var moduleName = property.get('value', 'arguments', 0, 'value').value
-					var importStatement = util.createImportStatement(moduleName, variableName, undefined, property.node.comments)
+					var subdirectories = moduleName.split('/')
+					var variableName = subdirectories[subdirectories.length - 1]
 
+					/**
+					 * after thinking about recursively mapping subdirectories i think it might be
+					 * time to throw up our hands and let someone manually fix this.
+					 */
+					if (moduleNames[variableName] && moduleNames[variableName] !== moduleName) {
+						console.error(`Could not map: ${moduleName} in file: ${file}, skipping.`)
+						return
+					}
+
+					var importStatement = util.createImportStatement(moduleName, variableName, undefined, property.node.comments)
 					// modify property
 					var newProp = api.jscodeshift.property(property.node.kind, property.node.key, property.node.key)
-					newProp.shorthand = true
+					newProp.value = variableName
 
-					j(variableDeclaration).insertBefore(importStatement)
-					j(property).replaceWith(newProp)
+					// if the module already exists, don't insert another importStatement.
+					if (moduleNames[variableName]) {
+						j(property).replaceWith(newProp);
+					} else {
+						moduleNames[variableName] = moduleName;
+						j(variableDeclaration).insertBefore(importStatement)
+						j(property).replaceWith(newProp)
+					}
 				});
 		});
 
