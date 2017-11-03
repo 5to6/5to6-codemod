@@ -252,6 +252,15 @@ var util = {
 
   hasParentOfType: function(node, type) {
     return util.findParentOfType(node, type) !== false;
+  },
+
+  filterRedundantComments: function(commentsOrig, commentsNew) {
+    if (!commentsOrig || !commentsNew) {
+      // return all comments if there were no original ones
+      return commentsNew;
+    }
+    return commentsNew.filter(comment =>
+        !commentsOrig.some(c => c.value === comment.value));
   }
 };
 

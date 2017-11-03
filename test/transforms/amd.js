@@ -24,4 +24,11 @@ describe('AMD transform', function() {
     var result = amdTransform({ source: src }, { jscodeshift: jscodeshift });
     assert.equal(result, expectedSrc);
   });
+
+  it('should convert define(function(require) {})', function() {
+    var src = fs.readFileSync(path.resolve(__dirname, '../fixtures/amd_with_require.before.js')).toString();
+    var expectedSrc = fs.readFileSync(path.resolve(__dirname, '../fixtures/amd_with_require.after.js')).toString();
+    var result = amdTransform({ source: src }, { jscodeshift: jscodeshift });
+    assert.equal(result, expectedSrc);
+  });
 });
