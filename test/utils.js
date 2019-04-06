@@ -281,6 +281,24 @@ describe('util.getRecastConfig', function() {
   });
 })
 
+describe('util.filterRedundantComments', function() {
+  it('should remove comments that already appear in the source comment array', function() {
+    var source = [
+      { value: 'comment one' },
+      { value: 'comment two' },
+      { value: 'comment three' }
+    ];
+
+    var test = [
+      { value: 'comment one' },
+      { value: 'new comment' }
+    ];
+
+    var filtered = utils.filterRedundantComments(source, test);
+    assert.deepEqual(filtered, [{ value: 'new comment' }]);
+  });
+});
+
 /******************************************
  * Test Helpers...
  ******************************************/
