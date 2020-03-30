@@ -41,3 +41,44 @@ define(['a', 'b', 'c', 'd'], function(moduleA, moduleB, moduleC) {
 	console.log('xyz');
 });
 
+define(() => {
+	console.log('c');
+});
+
+define(() => {
+	return {};
+});
+
+define(() => {
+  return {};
+  console.log('last statement');
+});
+
+define([], () => {
+	console.log('d');
+});
+
+define(['d'], () => {
+	console.log('dont bother with d');
+});
+
+define(['d'], (d) => {
+  console.log('I need you D', d.isUsed());
+  return d.e;
+});
+
+define([], () => ({
+	e: '123'
+}));
+
+define(['e'], () => ({
+	e: 'e is ignored'
+}));
+
+define(['e'], (e) => ({
+	e: `e is ${e.isUsed()}`
+}));
+
+define(() => ({
+	f: '123'
+}));

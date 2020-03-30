@@ -29,3 +29,33 @@ import moduleB from 'b';
 import moduleC from 'c';
 import 'd';
 console.log('xyz');
+console.log('c');
+export default {};
+export default {};
+console.log('last statement');
+console.log('d');
+import 'd';
+console.log('dont bother with d');
+import d from 'd';
+console.log('I need you D', d.isUsed());
+export default d.e;
+
+export default {
+	e: '123'
+};
+
+import 'e';
+
+export default {
+	e: 'e is ignored'
+};
+
+import e from 'e';
+
+export default {
+	e: `e is ${e.isUsed()}`
+};
+
+export default {
+	f: '123'
+};

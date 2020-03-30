@@ -10,6 +10,16 @@ module.exports = function(file, api, options) {
     var leadingComment = root.find(j.Program).get('body', 0).node.leadingComments;
 
     /**
+     * Get factory function whether arrow expression or block statement
+     * @param factory - Function body AST
+     */
+    function getFactoryBody(factory) {
+        return factory.body.type === 'BlockStatement'
+            ? factory.body.body
+            : [j.returnStatement(factory.body)]
+    }
+
+    /**
      * Convert an `return` to `export default`.
      * @param body - Function body AST (Array)
      */
@@ -39,7 +49,7 @@ module.exports = function(file, api, options) {
             if (p.value.arguments.length === 1) {
 
                 // convert `return` statement to `export default`
-                body = returnToExport(p.value.arguments[0].body.body);
+                body = returnToExport(getFactoryBody(p.value.arguments[0]));
 
                 return j(p.parent).replaceWith(body);
             }
@@ -55,7 +65,7 @@ module.exports = function(file, api, options) {
                 });
 
                 // add the body after the import statements
-                Array.prototype.push.apply(importStatements, p.value.arguments[1].body.body);
+                Array.prototype.push.apply(importStatements, getFactoryBody(p.value.arguments[1]));
 
                 // add any comments at the top
                 importStatements[0].comments = comments;
