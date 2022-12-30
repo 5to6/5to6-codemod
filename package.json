@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
-    "mocha": "^6.0.2"
+    "mocha": "^10.2.0"
   },
   "directories": {
     "test": "test"
